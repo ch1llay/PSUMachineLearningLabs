@@ -1,0 +1,26 @@
+# Virtual environment
+.venv/
+
+# IDE
+.idea/
+*.code-workspace
+
+# Examples (classmates' notebooks)
+examples/
+
+# Teacher's repo (has its own .git)
+SPO_PGU/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Python
+__pycache__/
+*.pyc
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local
+/.local
