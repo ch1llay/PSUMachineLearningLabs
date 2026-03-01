@@ -8,14 +8,14 @@ Act as a Senior Python ML developer/researcher helping complete university machi
 
 ## Project Overview
 
-PSU Machine Learning Labs — university course with 16 lab assignments. All work is in Jupyter notebooks using Python 3.14 (`.venv/`). No build system, requirements.txt, or test suite.
+PSU Machine Learning Labs — university course with 16 lab assignments. All work is in Jupyter notebooks using Python 3.12 (`/home/ilya/venvs/psu-ml/`). No build system, requirements.txt, or test suite. Note: venv lives outside VBox shared folder because shared folders don't support symlinks.
 
 Core libraries: pandas, numpy, scikit-learn, matplotlib, seaborn, plotly.
 
 ## Running
 
 ```bash
-source .venv/Scripts/activate   # Windows Git Bash
+source /home/ilya/venvs/psu-ml/bin/activate   # Linux VM
 jupyter notebook lab1/lab1.ipynb
 ```
 
