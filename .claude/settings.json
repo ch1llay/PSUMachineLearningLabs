@@ -1,5 +1,46 @@
 {
-
+  "permissions": {
+    "allow": [
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git status*)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(python3 *)",
+      "Bash(jupyter nbconvert *)",
+      "Bash(source /home/ilya/venvs/psu-ml/bin/activate*)",
+      "Bash(ls *)",
+      "Bash(mkdir *)",
+      "Bash(test *)",
+      "Bash(chmod +x .claude/*)",
+      "Bash(jq *)",
+      "Bash(wc *)",
+      "Read",
+      "Edit",
+      "Write",
+      "NotebookEdit",
+      "mcp__jupyter__*",
+      "mcp__context7__*"
+    ],
+    "deny": [
+      "Bash(git push*)",
+      "Bash(git remote *)",
+      "Bash(sudo *)",
+      "Bash(su *)",
+      "Bash(curl *)",
+      "Bash(wget *)",
+      "Bash(ssh *)",
+      "Bash(rm -rf *)",
+      "Bash(rm -r *)",
+      "Bash(rm --recursive *)",
+      "Bash(dd *)",
+      "Bash(mkfs *)",
+      "Bash(pip install *)",
+      "Bash(pip uninstall *)",
+      "Bash(kill *)",
+      "Bash(killall *)"
+    ]
+  },
   "hooks": {
     "Stop": [
       {
