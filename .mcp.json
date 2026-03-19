@@ -1,0 +1,19 @@
+{
+  "mcpServers": {
+    "context7": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp@latest"]
+    },
+    "jupyter": {
+      "type": "stdio",
+      "command": "/home/ilya/venvs/psu-ml/bin/python",
+      "args": ["-m", "jupyter_mcp_server"],
+      "env": {
+        "JUPYTER_URL": "http://localhost:8888",
+        "JUPYTER_TOKEN": "psu-ml-token",
+        "ALLOW_IMG_OUTPUT": "true"
+      }
+    }
+  }
+}

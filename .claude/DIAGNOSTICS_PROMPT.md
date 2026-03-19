@@ -8,7 +8,7 @@
 # Корневые файлы
 test -f CLAUDE.md && echo "✅ CLAUDE.md" || echo "❌ CLAUDE.md не найден"
 test -f README.md && echo "✅ README.md" || echo "❌ README.md не найден"
-test -f AUTORUN_PROMPT.md && echo "✅ AUTORUN_PROMPT.md" || echo "❌ AUTORUN_PROMPT.md не найден"
+test -f .claude/AUTORUN_PROMPT.md && echo "✅ .claude/AUTORUN_PROMPT.md" || echo "❌ .claude/AUTORUN_PROMPT.md не найден"
 
 # Claude конфиги
 test -f .claude/settings.json && echo "✅ .claude/settings.json" || echo "❌ .claude/settings.json не найден"
@@ -48,20 +48,20 @@ jq --version && echo "✅ jq доступен" || echo "❌ jq не устано
 ## 6. Проверка виртуального окружения
 
 ```bash
-test -d .venv && echo "✅ .venv существует" || echo "❌ .venv не найден"
-source .venv/bin/activate && python3 --version && echo "✅ venv активируется"
-source .venv/bin/activate && jupyter --version && echo "✅ jupyter доступен" || echo "❌ jupyter не установлен"
-source .venv/bin/activate && python3 -c "import pandas, numpy, sklearn, matplotlib, seaborn, plotly; print('✅ все библиотеки доступны')" || echo "❌ не все библиотеки установлены"
+test -d /home/ilya/venvs/psu-ml && echo "✅ venv существует" || echo "❌ venv не найден по пути /home/ilya/venvs/psu-ml"
+source /home/ilya/venvs/psu-ml/bin/activate && python3 --version && echo "✅ venv активируется"
+source /home/ilya/venvs/psu-ml/bin/activate && jupyter --version && echo "✅ jupyter доступен" || echo "❌ jupyter не установлен"
+source /home/ilya/venvs/psu-ml/bin/activate && python3 -c "import pandas, numpy, sklearn, matplotlib, seaborn, plotly; print('✅ все библиотеки доступны')" || echo "❌ не все библиотеки установлены"
 ```
 
 ## 7. Проверка датасета
 
 ```bash
 test -f datasets/gtzan/features_30_sec.csv && echo "✅ датасет найден" || echo "❌ датасет не найден по пути datasets/gtzan/features_30_sec.csv"
-source .venv/bin/activate && python3 -c "
+source /home/ilya/venvs/psu-ml/bin/activate && python3 -c "
 import pandas as pd
 df = pd.read_csv('datasets/gtzan/features_30_sec.csv')
-print(f'✅ датасет загружается: {df.shape} строк, {df.shape} столбцов')[1]
+print(f'✅ датасет загружается: {df.shape[0]} строк, {df.shape[1]} столбцов')
 print(f'   колонки label: {\"label\" in df.columns}')
 "
 ```
@@ -86,7 +86,7 @@ ls "examples/лабы примеры Олег/Машинное обучение/
 
 ```bash
 # Количество блоков кода должно быть чётным
-COUNT=$(grep -c '```' AUTORUN_PROMPT.md)
+COUNT=$(grep -c '```' .claude/AUTORUN_PROMPT.md)
 if [ $((COUNT % 2)) -eq 0 ]; then
   echo "✅ код-блоки закрыты корректно (найдено $COUNT штук)"
 else
@@ -125,7 +125,7 @@ import json
 d = json.load(open('.claude/progress.json'))
 d['status'] = 'in_progress'
 d['current_lab'] = 4
-d['completed_labs'] =[2][3][1]
+d['completed_labs'] = [1, 2, 3]
 json.dump(d, open('.claude/progress.json', 'w'), indent=2)
 print('✅ progress.json восстановлен:', d)
 "
