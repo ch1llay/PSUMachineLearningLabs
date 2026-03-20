@@ -1,0 +1,125 @@
+# Диагностика: проверка готовности к автономному выполнению лаб — {{SUBJECT_NAME}}
+
+Выполни все проверки по порядку. После каждой пиши результат: OK или ПРОБЛЕМА + что именно не так.
+
+## 1. Проверка структуры репозитория
+
+```bash
+# Корневые файлы
+test -f CLAUDE.md && echo "OK CLAUDE.md" || echo "ПРОБЛЕМА CLAUDE.md не найден"
+test -f README.md && echo "OK README.md" || echo "ПРОБЛЕМА README.md не найден"
+test -f .claude/AUTORUN_PROMPT.md && echo "OK .claude/AUTORUN_PROMPT.md" || echo "ПРОБЛЕМА .claude/AUTORUN_PROMPT.md не найден"
+
+# Claude конфиги
+test -f .claude/settings.json && echo "OK .claude/settings.json" || echo "ПРОБЛЕМА .claude/settings.json не найден"
+test -f .claude/progress.json && echo "OK .claude/progress.json" || echo "ПРОБЛЕМА .claude/progress.json не найден"
+test -f .claude/hooks/stop.sh && echo "OK .claude/hooks/stop.sh" || echo "ПРОБЛЕМА .claude/hooks/stop.sh не найден"
+```
+
+## 2. Проверка прав на хук
+
+```bash
+test -x .claude/hooks/stop.sh && echo "OK stop.sh исполняемый" || echo "ПРОБЛЕМА stop.sh не исполняемый — выполни: chmod +x .claude/hooks/stop.sh"
+```
+
+## 3. Проверка содержимого progress.json
+
+```bash
+cat .claude/progress.json
+```
+Убедись что JSON валидный и содержит поля: `current_lab`, `completed_labs`, `status`.
+```bash
+python3 -c "import json; d=json.load(open('.claude/progress.json')); print('OK JSON валидный:', d)" || echo "ПРОБЛЕМА JSON невалидный"
+```
+
+## 4. Проверка settings.json
+
+```bash
+cat .claude/settings.json
+python3 -c "import json; d=json.load(open('.claude/settings.json')); hooks=d.get('hooks',{}); stop=hooks.get('Stop',[]); print('OK Stop hook зарегистрирован:', stop) if stop else print('ПРОБЛЕМА Stop hook не найден в settings.json')"
+```
+
+## 5. Проверка что jq установлен
+
+```bash
+jq --version && echo "OK jq доступен" || echo "ПРОБЛЕМА jq не установлен — выполни: sudo apt install jq"
+```
+
+## 6. Проверка виртуального окружения
+
+```bash
+test -d {{VENV_PATH}} && echo "OK venv существует" || echo "ПРОБЛЕМА venv не найден по пути {{VENV_PATH}}"
+source {{VENV_PATH}}/bin/activate && python3 --version && echo "OK venv активируется"
+source {{VENV_PATH}}/bin/activate && jupyter --version && echo "OK jupyter доступен" || echo "ПРОБЛЕМА jupyter не установлен"
+source {{VENV_PATH}}/bin/activate && python3 -c "{{LIBRARY_IMPORT_CHECK}}" || echo "ПРОБЛЕМА не все библиотеки установлены"
+```
+
+{{#IF HAS_DATASET}}## 7. Проверка датасета
+
+```bash
+test -f {{DATASET_PATH}} && echo "OK датасет найден" || echo "ПРОБЛЕМА датасет не найден по пути {{DATASET_PATH}}"
+source {{VENV_PATH}}/bin/activate && python3 -c "{{DATASET_LOAD_CHECK}}"
+```
+{{/IF}}
+
+## {{DIAG_STEP_ASSIGNMENTS}}. Проверка заданий
+
+```bash
+ls "{{ASSIGNMENTS_PATH}}" && echo "OK папка с заданиями найдена" || echo "ПРОБЛЕМА папка с заданиями не найдена"
+```
+
+{{#IF HAS_EXAMPLES}}## {{DIAG_STEP_EXAMPLES}}. Проверка примеров одногруппников
+
+{{EXAMPLES_CHECK_COMMANDS}}
+{{/IF}}
+
+## {{DIAG_STEP_MARKDOWN}}. Проверка AUTORUN_PROMPT.md на корректность markdown
+
+```bash
+COUNT=$(grep -c '```' .claude/AUTORUN_PROMPT.md)
+if [ $((COUNT % 2)) -eq 0 ]; then
+  echo "OK код-блоки закрыты корректно (найдено $COUNT штук)"
+else
+  echo "ПРОБЛЕМА нечётное количество тройных обратных кавычек ($COUNT) — есть незакрытый блок кода"
+fi
+```
+
+## {{DIAG_STEP_HOOK_TEST}}. Тест хука вручную
+
+Симулируй вызов хука как будто лаба завершена:
+```bash
+# Сохраняем текущий прогресс
+cp .claude/progress.json .claude/progress.json.bak
+
+# Временно выставим status=lab_done
+python3 -c "
+import json
+d = json.load(open('.claude/progress.json'))
+d['status'] = 'lab_done'
+d['current_lab'] = {{FIRST_LAB}}
+json.dump(d, open('.claude/progress.json', 'w'), indent=2)
+print('Установлен тестовый статус lab_done для лабы {{FIRST_LAB}}')
+"
+
+# Вызываем хук вручную с тестовым JSON
+echo '{"stop_hook_active": false}' | bash .claude/hooks/stop.sh
+echo "Код возврата хука: $?"
+
+# Проверяем что прогресс обновился
+cat .claude/progress.json
+```
+
+## {{DIAG_STEP_RESTORE}}. Восстанови progress.json
+
+```bash
+cp .claude/progress.json.bak .claude/progress.json && rm .claude/progress.json.bak
+echo "OK progress.json восстановлен"
+cat .claude/progress.json
+```
+
+## Итог
+
+После всех проверок выведи сводку:
+- Сколько пунктов OK
+- Список всех ПРОБЛЕМ с конкретными командами для исправления
+- Вердикт: ГОТОВО К ЗАПУСКУ / НУЖНО ИСПРАВИТЬ

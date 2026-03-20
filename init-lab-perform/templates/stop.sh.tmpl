@@ -1,0 +1,96 @@
+#!/bin/bash
+
+# Читаем JSON из stdin
+INPUT=$(cat)
+
+# Если хук уже запускался в этом цикле — позволяем остановиться
+HOOK_ACTIVE=$(echo "$INPUT" | jq -r '.stop_hook_active // false')
+if [ "$HOOK_ACTIVE" = "true" ]; then
+  exit 0
+fi
+
+PROGRESS_FILE="$(dirname "$0")/../progress.json"
+
+# Если файла прогресса нет — создаём
+if [ ! -f "$PROGRESS_FILE" ]; then
+  echo '{"mode": "execute", "current_lab": {{FIRST_LAB}}, "completed_labs": [], "status": "in_progress", "retry_count": 0, "last_error": null, "review": {"reviewed_labs": [], "fixed_labs": [], "skipped_labs": []}}' > "$PROGRESS_FILE"
+  exit 0
+fi
+
+STATUS=$(jq -r '.status' "$PROGRESS_FILE")
+CURRENT=$(jq -r '.current_lab' "$PROGRESS_FILE")
+MODE=$(jq -r '.mode // "execute"' "$PROGRESS_FILE")
+
+# Валидные номера лаб для этого курса
+VALID_LABS=({{LAB_NUMBERS}})
+MAX_LAB={{MAX_LAB}}
+
+# Найти следующую валидную лабу после текущей
+get_next_lab() {
+  local cur=$1
+  for lab in "${VALID_LABS[@]}"; do
+    if [ "$lab" -gt "$cur" ]; then
+      echo "$lab"
+      return
+    fi
+  done
+  echo "done"
+}
+
+# ========== РЕЖИМ РЕВЬЮ ==========
+if [ "$MODE" = "review" ]; then
+  if [ "$STATUS" = "lab_review_done" ] && [ "$CURRENT" -le "$MAX_LAB" ]; then
+    NEXT=$(get_next_lab "$CURRENT")
+
+    if [ "$NEXT" = "done" ]; then
+      # Все лабы проверены
+      jq '.status = "all_reviewed"' "$PROGRESS_FILE" > /tmp/progress_tmp.json && cp /tmp/progress_tmp.json "$PROGRESS_FILE" && rm /tmp/progress_tmp.json
+      echo '{"continue": true, "reason": "Все лабы проверены! Сгенерируй итоговый .claude/REVIEW_REPORT.md, закоммить все REVIEW.md и установи status=all_reviewed в progress.json."}'
+      exit 0
+    fi
+
+    # Обновляем прогресс: следующая лаба, статус review_in_progress
+    jq --argjson next "$NEXT" \
+       '.current_lab = $next | .status = "review_in_progress" | .retry_count = 0 | .last_error = null' \
+       "$PROGRESS_FILE" > /tmp/progress_tmp.json && cp /tmp/progress_tmp.json "$PROGRESS_FILE" && rm /tmp/progress_tmp.json
+
+    echo "{\"continue\": true, \"reason\": \"Ревью лабы $CURRENT завершено. Начинай ревью лабы $NEXT по процессу из .claude/REVIEW_PROMPT.md.\"}"
+    exit 0
+  fi
+
+  if [ "$STATUS" = "all_reviewed" ]; then
+    echo '{"continue": false, "reason": "Ревью всех лабораторных работ завершено!"}'
+    exit 0
+  fi
+
+  # Обычная остановка в режиме ревью
+  exit 0
+fi
+
+# ========== РЕЖИМ ВЫПОЛНЕНИЯ ==========
+if [ "$STATUS" = "lab_done" ] && [ "$CURRENT" -le "$MAX_LAB" ]; then
+  NEXT=$(get_next_lab "$CURRENT")
+
+  if [ "$NEXT" = "done" ]; then
+    echo '{"continue": false, "reason": "Все лабораторные работы завершены!"}'
+    exit 0
+  fi
+
+  # Обновляем прогресс: следующая лаба, статус in_progress, сброс retry
+  jq --argjson next "$NEXT" \
+     --argjson cur "$CURRENT" \
+     '.current_lab = $next | .status = "in_progress" | .completed_labs += [$cur] | .retry_count = 0 | .last_error = null' \
+     "$PROGRESS_FILE" > /tmp/progress_tmp.json && cp /tmp/progress_tmp.json "$PROGRESS_FILE" && rm /tmp/progress_tmp.json
+
+  echo "{\"continue\": true, \"reason\": \"Лаба $CURRENT завершена. Начинай выполнение лабы $NEXT по процессу из .claude/AUTORUN_PROMPT.md. Прочитай задание, изучи примеры, составь план с теорией, проверь план, реализуй с образовательным контентом, пройди валидацию качества, сделай коммит, обнови README и progress.json (status=lab_done).\"}"
+  exit 0
+fi
+
+# Все лабы сделаны — останавливаемся
+if [ "$CURRENT" -gt "$MAX_LAB" ]; then
+  echo '{"continue": false}'
+  exit 0
+fi
+
+# Иначе — нормальная остановка
+exit 0

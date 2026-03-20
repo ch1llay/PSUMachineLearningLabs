@@ -1,0 +1,23 @@
+{
+  "mcpServers": {
+    "context7": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@upstash/context7-mcp@latest"
+      ]
+    },
+    "jupyter": {
+      "command": "{{VENV_PATH}}/bin/python",
+      "args": [
+        "-m",
+        "jupyter_mcp_server"
+      ],
+      "env": {
+        "JUPYTER_BASE_URL": "{{JUPYTER_URL}}",
+        "JUPYTER_TOKEN": "{{JUPYTER_TOKEN}}",
+        "ALLOW_IMG_OUTPUT": "true"
+      }
+    }
+  }
+}

@@ -1,0 +1,77 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Role
+
+{{ROLE}}, helping complete university {{SUBJECT_NAME}} lab assignments.
+
+## Project Overview
+
+{{PROJECT_DESCRIPTION}} — university course with {{LAB_COUNT}} lab assignments. All work is in Jupyter notebooks using Python ({{VENV_PATH}}). No build system, requirements.txt, or test suite.
+
+Core libraries: {{LIBRARIES}}.
+
+## Running
+
+```bash
+source {{VENV_PATH}}/bin/activate
+jupyter notebook {{FIRST_LAB_DIR}}/{{FIRST_LAB_NOTEBOOK}}
+```
+
+## Repository Layout
+
+- `{{LAB_DIR_EXAMPLE}}` — Lab notebook directories (one per lab, primary working area)
+{{#IF HAS_DATASET}}- `{{DATASET_PATH}}` — {{DATASET_DESCRIPTION}}
+{{/IF}}{{#IF HAS_ASSIGNMENTS_DIR}}- `{{ASSIGNMENTS_PATH}}` — Assignment files from the course
+{{/IF}}{{#IF HAS_EXAMPLES}}- `examples/` — Classmates' example notebooks
+{{/IF}}
+
+### Assignments (tasks to implement)
+
+{{#IF HAS_ASSIGNMENTS_DIR}}Located in `{{ASSIGNMENTS_PATH}}`:
+{{/IF}}
+{{LAB_TABLE}}
+
+{{#IF HAS_EXAMPLES}}### Examples from classmates
+
+{{EXAMPLES_DESCRIPTION}}
+{{/IF}}
+
+## Workflow for Each Lab
+
+1. Read the assignment {{#IF HAS_ASSIGNMENTS_DIR}}from `{{ASSIGNMENTS_PATH}}`{{/IF}}
+{{#IF HAS_EXAMPLES}}2. Study classmates' examples
+3. Create a detailed implementation plan — aim to do **better** than the examples
+4. Implement in the corresponding lab directory
+{{/IF}}{{#IF NO_EXAMPLES}}2. Research the topic using context7 MCP for library documentation
+3. Create a detailed implementation plan
+4. Implement in the corresponding lab directory
+{{/IF}}
+
+{{#IF HAS_DATASET}}## Dataset
+
+{{DATASET_FULL_DESCRIPTION}}
+{{/IF}}
+
+## Conventions
+
+- Notebook cells should have markdown headers explaining each step in {{MARKDOWN_LANGUAGE_FULL}}
+- {{MARKDOWN_LANGUAGE_FULL}} text in labels, comments, and markdown cells is expected
+{{EXTRA_CONVENTIONS}}
+
+## Autonomous Modes
+
+Two automation modes controlled by `mode` field in `.claude/progress.json`:
+
+### Execute Mode (`mode: "execute"`)
+- Prompt: `.claude/AUTORUN_PROMPT.md`
+- Creates labs sequentially (study -> plan -> implement -> commit)
+- Hook auto-advances to next lab on completion
+
+### Review Mode (`mode: "review"`)
+- Prompt: `.claude/REVIEW_PROMPT.md`
+- Reviews each lab: grades on 7 criteria, fixes issues, writes `{{LAB_DIR_PATTERN}}/REVIEW.md`
+- Hook auto-advances to next lab on `status: "lab_review_done"`
+- Final report: `.claude/REVIEW_REPORT.md`
+- To start: set `mode: "review"`, `current_lab: {{FIRST_LAB}}`, `status: "review_in_progress"` in progress.json
