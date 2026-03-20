@@ -78,3 +78,19 @@ Primary dataset: GTZAN Genre Collection (`datasets/gtzan/features_30_sec.csv`)
 - Russian text in labels, comments, and markdown cells is expected
 - Use standard scikit-learn workflow: load CSV → DataFrame → train_test_split → fit/predict → visualize
 - Black formatter configured in IDE
+
+## Autonomous Modes
+
+Two automation modes controlled by `mode` field in `.claude/progress.json`:
+
+### Execute Mode (`mode: "execute"`)
+- Prompt: `.claude/AUTORUN_PROMPT.md`
+- Creates labs sequentially (study → plan → implement → commit)
+- Hook auto-advances to next lab on completion
+
+### Review Mode (`mode: "review"`)
+- Prompt: `.claude/REVIEW_PROMPT.md`
+- Reviews each lab: grades on 7 criteria, fixes issues, writes `lab{N}/REVIEW.md`
+- Hook auto-advances to next lab on `status: "lab_review_done"`
+- Final report: `.claude/REVIEW_REPORT.md`
+- To start: set `mode: "review"`, `current_lab: 1`, `status: "review_in_progress"` in progress.json

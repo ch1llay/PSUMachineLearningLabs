@@ -1,11 +1,49 @@
 {
-  "current_lab": 4,
+  "mode": "review",
+  "current_lab": 17,
   "completed_labs": [
     1,
     2,
-    3
+    3,
+    4,
+    5,
+    6,
+    7,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16
   ],
-  "status": "in_progress",
+  "status": "all_reviewed",
   "retry_count": 0,
-  "last_error": null
+  "last_error": null,
+  "review": {
+    "reviewed_labs": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16
+    ],
+    "fixed_labs": [
+      1,
+      2,
+      3
+    ],
+    "skipped_labs": []
+  }
 }
