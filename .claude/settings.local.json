@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(source:*)",
+      "Bash(git commit:*)",
+      "Bash(head:*)",
+      "Bash(python3 -c \":*)"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "context7",
+    "jupyter"
+  ]
+}
