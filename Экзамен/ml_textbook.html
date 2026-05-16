@@ -1,0 +1,1628 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>МО — интерактивный учебник к экзамену</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root{
+    --bg:#0f172a; --panel:#1e293b; --panel2:#334155; --text:#e2e8f0; --muted:#94a3b8;
+    --accent:#38bdf8; --good:#22c55e; --warn:#f59e0b; --bad:#ef4444; --border:#334155;
+  }
+  html,body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,sans-serif}
+  .panel{background:var(--panel);border:1px solid var(--border);border-radius:12px}
+  .panel2{background:var(--panel2);border:1px solid var(--border);border-radius:8px}
+  .accent{color:var(--accent)}
+  .muted{color:var(--muted)}
+  .btn{background:var(--panel2);color:var(--text);padding:8px 14px;border-radius:8px;border:1px solid var(--border);cursor:pointer;transition:.15s}
+  .btn:hover{background:#475569;border-color:var(--accent)}
+  .btn-primary{background:var(--accent);color:#082f49;font-weight:600;border:none}
+  .btn-primary:hover{background:#0ea5e9}
+  .btn-good{background:var(--good);color:#052e1a;border:none}
+  .btn-bad{background:var(--bad);color:#fff;border:none}
+  .quiz-opt{display:block;width:100%;text-align:left;padding:10px 14px;margin:6px 0;background:#1e293b;border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:.15s}
+  .quiz-opt:hover{background:#334155;border-color:var(--accent)}
+  .quiz-opt.correct{background:rgba(34,197,94,0.18);border-color:var(--good)}
+  .quiz-opt.wrong{background:rgba(239,68,68,0.18);border-color:var(--bad)}
+  .quiz-opt.disabled{cursor:default;opacity:.85}
+  .sidebar a{display:block;padding:6px 10px;border-radius:6px;color:var(--text);text-decoration:none;font-size:14px}
+  .sidebar a:hover{background:var(--panel2)}
+  .sidebar a.active{background:var(--accent);color:#082f49;font-weight:600}
+  .sidebar a .ind{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:8px;background:#475569}
+  .sidebar a .ind.done{background:var(--good)}
+  .sidebar a .ind.partial{background:var(--warn)}
+  .sidebar a .ind.bad{background:var(--bad)}
+  .progress-bar{height:6px;background:var(--panel2);border-radius:3px;overflow:hidden}
+  .progress-bar .fill{height:100%;background:var(--accent);transition:.3s}
+  .formula{background:#0b1220;border:1px solid var(--border);padding:10px 14px;border-radius:8px;margin:6px 0;overflow-x:auto}
+  .pitfall{padding:8px 12px;border-left:3px solid var(--warn);background:#1e293b;margin:6px 0;border-radius:0 6px 6px 0}
+  .tldr{padding:14px;border-left:4px solid var(--accent);background:rgba(56,189,248,0.08);border-radius:0 8px 8px 0;font-size:16px}
+  .intuition{padding:14px;border-left:4px solid #a78bfa;background:rgba(167,139,250,0.08);border-radius:0 8px 8px 0}
+  .badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:10px;background:var(--panel2);color:var(--muted);margin-left:6px}
+  .h-section{font-size:13px;letter-spacing:0.05em;color:var(--muted);text-transform:uppercase;margin-top:18px;margin-bottom:8px}
+  details summary{cursor:pointer;list-style:none}
+  details summary::-webkit-details-marker{display:none}
+  .mermaid{background:#fff;padding:10px;border-radius:8px}
+  .slider-wrap{display:flex;align-items:center;gap:12px;margin:8px 0}
+  .slider-wrap input[type=range]{flex:1}
+  .grid-eul{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media (max-width:900px){.grid-eul{grid-template-columns:1fr}}
+  kbd{background:#0b1220;padding:2px 6px;border-radius:4px;border:1px solid var(--border);font-size:12px}
+  table.t{width:100%;border-collapse:collapse;font-size:14px;margin:8px 0}
+  table.t th,table.t td{border:1px solid var(--border);padding:6px 10px;text-align:left}
+  table.t th{background:var(--panel2)}
+  .pill{display:inline-block;padding:2px 8px;border-radius:10px;background:#0b1220;border:1px solid var(--border);font-size:12px;margin:2px}
+  .pill.acc{background:rgba(56,189,248,0.18);border-color:var(--accent);color:var(--accent)}
+  .scroll-hint{font-size:12px;color:var(--muted)}
+  .stat-strong{font-size:24px;font-weight:700;color:var(--accent)}
+  canvas{max-width:100%}
+</style>
+</head>
+<body>
+<header class="sticky top-0 z-30 panel" style="border-radius:0;border-left:none;border-right:none;border-top:none">
+  <div class="max-w-7xl mx-auto px-4 py-3 flex items-center gap-4">
+    <div class="font-bold text-lg">📘 МО · экзамен</div>
+    <div class="flex-1 max-w-md">
+      <div class="progress-bar"><div class="fill" id="progressFill" style="width:0%"></div></div>
+      <div class="text-xs muted mt-1" id="progressText">0 из 41 тем пройдено</div>
+    </div>
+    <button class="btn" onclick="toggleSidebar()" id="sbToggle">📑 Темы</button>
+    <button class="btn" onclick="weakMode()">🔁 Слабые места</button>
+    <button class="btn" onclick="resetProgress()" title="Сбросить прогресс">↺</button>
+  </div>
+</header>
+
+<div class="max-w-7xl mx-auto px-4 py-4 flex gap-4">
+  <aside id="sidebar" class="sidebar panel p-3 sticky top-20 self-start" style="width:260px;max-height:calc(100vh - 100px);overflow-y:auto">
+    <!-- наполняется JS -->
+  </aside>
+  <main id="main" class="flex-1 panel p-6" style="min-width:0">
+    <!-- контент темы -->
+  </main>
+</div>
+
+<script>
+/* =========================================================
+   ДАННЫЕ ВСЕХ ТЕМ
+   ========================================================= */
+const TOPICS = [
+/* ===== БЛОК A. Введение ===== */
+{
+id:1, block:"A. Введение", title:"Структура ИИ и виды машинного обучения",
+tldr:"AI ⊃ ML ⊃ ANN ⊃ Deep Learning. По наличию меток МО делится на supervised / unsupervised / reinforcement; типы задач — классификация, регрессия, кластеризация, понижение размерности.",
+intuition:"AI — это всё про «компьютер делает умное». ML — особый подход: не пишем правила вручную, а даём примеры и алгоритм сам выводит закономерность. Глубокое обучение — частный случай ML, где модель — это многослойная нейросеть.",
+viz:{type:"mermaid",code:`graph TD
+A[Искусственный интеллект - AI]:::ai --> B[Машинное обучение - ML]:::ml
+B --> C[Нейронные сети - ANN]:::ann
+C --> D[Глубокое обучение - DL]:::dl
+B --> E[Supervised<br/>классификация, регрессия]
+B --> F[Unsupervised<br/>кластеризация, PCA]
+B --> G[Reinforcement<br/>агент в среде]
+classDef ai fill:#0ea5e9,color:#fff,stroke:#082f49
+classDef ml fill:#a78bfa,color:#fff
+classDef ann fill:#f59e0b,color:#000
+classDef dl fill:#22c55e,color:#000`},
+formulas:[
+  {tex:"\\mathcal{D}=\\{(x_i,y_i)\\}_{i=1}^{N}",explain:"обучающая выборка — пары объект-метка"},
+  {tex:"a:X\\to Y",explain:"гипотеза/модель — отображение вход → ответ"}
+],
+pitfalls:[
+  "Не путай AI и ML: ML — один из подходов к построению AI, не синоним.",
+  "Deep Learning — не отдельная дисциплина, это частный случай ML на глубоких нейросетях.",
+  "Supervised ≠ всегда классификация: бывает регрессия, ранжирование и пр."
+],
+quiz:[
+  {q:"Какой тип обучения использует только данные без меток?",opt:["Supervised","Unsupervised","Reinforcement","Self-supervised"],correct:1,explain:"Unsupervised работает только с x_i — задачи кластеризации, PCA, аномалии."},
+  {q:"К какой задаче относится прогноз цены квартиры (число)?",opt:["Классификация","Регрессия","Кластеризация","Понижение размерности"],correct:1,explain:"Цена — действительное число, значит регрессия."},
+  {q:"Reinforcement learning — это…",opt:["обучение по парам (x,y)","агент в среде, оптимизирующий награду","перенос знаний","автоматическая разметка"],correct:1,explain:"RL — агент получает награду от среды и максимизирует суммарный reward."},
+  {q:"Что НЕ является задачей unsupervised?",opt:["Кластеризация","Понижение размерности","Обнаружение аномалий","Классификация писем как спам/не спам"],correct:3,explain:"Спам/не спам — есть метки, это supervised classification."}
+]
+},
+{
+id:2, block:"A. Введение", title:"Постановка МО, риск, переобучение",
+tldr:"Минимизируем эмпирический риск Q (среднюю потерю на train), но цель — малый истинный риск R на новых данных. Зазор между ними — переобучение.",
+intuition:"Учим модель = подгоняем параметры под train. Но train — лишь конечный кусочек реальности. Если модель «зазубрила» train вместе с шумом, на новых данных она провалится. Bias-variance — фундаментальный компромисс: слишком простая модель недообучается (bias), слишком сложная переобучается (variance).",
+viz:{type:"chart",chartType:"biasVariance"},
+formulas:[
+  {tex:"Q(a,X^\\ell)=\\frac{1}{\\ell}\\sum_{i=1}^{\\ell}\\mathcal{L}(y_i,a(x_i))",explain:"эмпирический риск — среднее loss по train"},
+  {tex:"R(\\theta)=\\mathbb{E}_{(x,y)}[\\mathcal{L}(y,a(x))]",explain:"истинный риск — средняя потеря по всему распределению; именно он нас интересует"},
+  {tex:"\\mathbb{E}[(y-\\hat f)^2]=\\text{Bias}^2+\\text{Variance}+\\sigma^2",explain:"разложение MSE: смещение² + разброс + неустранимый шум"}
+],
+pitfalls:[
+  "Низкий train-loss ≠ хорошая модель. Только test показывает обобщение.",
+  "Регуляризация — про bias-variance trade-off, а не «чтобы сошлось».",
+  "Не подсматривай в test до финала, иначе test превратится в val.",
+  "Слишком простая модель не лечится бóльшим количеством данных."
+],
+quiz:[
+  {q:"Train-loss=0.01, test-loss=0.5. Что это?",opt:["Недообучение","Переобучение","Идеальная модель","Утечка данных"],correct:1,explain:"Огромный gap train↔test — классический overfitting."},
+  {q:"Что снижает variance?",opt:["Усложнение модели","Регуляризация и больше данных","Удаление train","Уменьшение валидации"],correct:1,explain:"L2/L1, ансамбли, dropout, аугментация — всё против variance."},
+  {q:"Bias — это…",opt:["разброс предсказаний","систематическая ошибка модели","шум в данных","ошибка валидации"],correct:1,explain:"Bias — насколько ожидание предсказания отличается от истины."},
+  {q:"Что есть истинный (ожидаемый) риск?",opt:["loss на train","loss на test","матожидание потери по всему распределению","loss на одной точке"],correct:2,explain:"R(θ)=E[L] по совместному распределению (x,y)."}
+]
+},
+
+/* ===== БЛОК B. Подготовка данных ===== */
+{
+id:3, block:"B. Подготовка данных", title:"Pipeline подготовки данных",
+tldr:"Подготовка = последовательность преобразований сырых данных в формат для модели: импьютация → очистка → кодирование → масштабирование → отбор/PCA → балансировка. Занимает 60–80% времени проекта.",
+intuition:"Думай как о готовке: сначала помыть и порезать, потом приправить, и только потом — на сковороду. Если перемешать порядок, модель «отравится». Главное правило кухни — fit только на train (узнаём приправы по обучающей выборке и применяем те же ко всем остальным).",
+viz:{type:"mermaid",code:`graph LR
+A[Raw data]:::r --> B[EDA]:::e
+B --> C[Impute<br/>пропуски]:::s
+C --> D[Clean<br/>дубли, выбросы]:::s
+D --> E[Encode<br/>категории]:::s
+E --> F[Scale<br/>масштаб]:::s
+F --> G[Select / PCA]:::s
+G --> H[Balance]:::s
+H --> I[Train/Val/Test]:::r
+I --> J[Model]:::m
+classDef r fill:#0ea5e9,color:#fff
+classDef e fill:#a78bfa,color:#fff
+classDef s fill:#f59e0b,color:#000
+classDef m fill:#22c55e,color:#000`},
+formulas:[
+  {tex:"\\mu_{train},\\sigma_{train}\\;\\to\\;\\text{transform}(X_{val}, X_{test})",explain:"параметры считаются ТОЛЬКО на train, применяются ко всем"}
+],
+pitfalls:[
+  "Самая частая ошибка — fit на всём датасете до train/test split. Это утечка (data leakage), оценка качества будет завышена.",
+  "ColumnTransformer + Pipeline (sklearn) гарантируют корректный порядок и отсутствие утечки.",
+  "Забыть применить те же преобразования к production-данным — ошибка инфраструктуры.",
+  "Балансировку (SMOTE) делают после split на train, иначе синтетические объекты «утекут» в test."
+],
+quiz:[
+  {q:"На каких данных fit-ить StandardScaler?",opt:["На всём датасете","Только на train","На train+val","На test"],correct:1,explain:"fit на train, transform на train/val/test — иначе data leakage."},
+  {q:"Что НЕ относится к подготовке данных?",opt:["Импьютация","Кодирование","Backpropagation","PCA"],correct:2,explain:"Backprop — это уже обучение нейросети, не подготовка."},
+  {q:"Почему так важен правильный pipeline?",opt:["Быстрее работает","Воспроизводимость и отсутствие утечек","Меньше памяти","Лучше визуализация"],correct:1,explain:"Главные цели — reproducibility и недопущение утечек."}
+]
+},
+{
+id:4, block:"B. Подготовка данных", title:"Заполнение пропусков (imputation)",
+tldr:"Пропуски либо удаляют (если их мало и они MCAR), либо заполняют статистикой по столбцу (mean/median/mode), kNN-импьютером или итеративной моделью (MICE). Часто добавляют флаг is_missing.",
+intuition:"Пропуск — не «ничего», а информация. Иногда сам факт пропуска — сильный признак (богатые не пишут доход → MNAR). Поэтому два инструмента: заполнить значением + добавить колонку-флажок.",
+viz:{type:"mermaid",code:`graph TD
+A[Пропуск в данных] --> B{Механизм?}
+B -->|MCAR<br/>совершенно случайно| C[Удалить или mean/median]
+B -->|MAR<br/>зависит от наблюдаемых| D[KNNImputer / MICE]
+B -->|MNAR<br/>зависит от самого пропуска| E[Спец. модели + флаг]
+C --> F[+ колонка is_missing]
+D --> F
+E --> F`},
+formulas:[
+  {tex:"\\hat x_{ij}=\\frac{1}{k}\\sum_{m\\in N_k(i)} x_{mj}",explain:"KNN-импьютер: пропуск j-го признака — среднее по k ближайшим объектам"}
+],
+pitfalls:[
+  "Среднее снижает дисперсию признака — корреляции искажаются.",
+  "Mode для редкой категории раздувает её долю.",
+  "Никогда не fit на всей выборке до split.",
+  "KNNImputer чувствителен к масштабу — масштабируй сначала, потом импьютируй (или наоборот, согласованно).",
+  "Перед удалением строк проверь, не теряешь ли всю информацию о редком классе."
+],
+quiz:[
+  {q:"Распределение скошенное, есть выбросы — чем заполнять?",opt:["Mean","Median","Mode","Нулём"],correct:1,explain:"Median устойчива к выбросам в отличие от mean."},
+  {q:"MNAR — это…",opt:["абсолютно случайные пропуски","зависят только от наблюдаемых признаков","зависят от самого пропущенного значения","вообще нет пропусков"],correct:2,explain:"MNAR = Missing Not At Random: пропуск зависит от того, что было бы записано."},
+  {q:"Зачем добавлять колонку is_missing?",opt:["Ускоряет обучение","Сохраняет факт пропуска как признак","Уменьшает размерность","Удаляет шум"],correct:1,explain:"Сам факт пропуска часто несёт информацию."},
+  {q:"Какой импьютер лучше при MAR и сложных зависимостях?",opt:["Mean","Constant=0","IterativeImputer (MICE)","drop"],correct:2,explain:"MICE моделирует каждый признак функцией остальных — учитывает зависимости."}
+]
+},
+{
+id:5, block:"B. Подготовка данных", title:"Очистка данных",
+tldr:"Очистка = дубли → форматы → типы → выбросы → опечатки → редкие категории. Для выбросов — boxplot/IQR, 3σ, z-score, IsolationForest, DBSCAN. Не всегда удаляют: иногда выбросы — сама цель (фрод).",
+intuition:"Выброс — это не «ошибка», а «нетипичное наблюдение». Сначала пойми, почему оно нетипично, и только потом решай: удалять, винзоризовать, логарифмировать или оставить.",
+viz:{type:"chart",chartType:"iqrBox"},
+formulas:[
+  {tex:"\\text{IQR}=Q_3-Q_1",explain:"межквартильный размах"},
+  {tex:"x<Q_1-1.5\\,\\text{IQR}\\;\\text{или}\\;x>Q_3+1.5\\,\\text{IQR}\\Rightarrow\\text{выброс}",explain:"правило Тьюки"},
+  {tex:"|z|=|x-\\mu|/\\sigma>3\\Rightarrow\\text{выброс}",explain:"z-score: только при примерно нормальном распределении"}
+],
+pitfalls:[
+  "3σ для скошенных распределений (например, доход) объявит почти всё справа выбросами.",
+  "Удалять выбросы на test — это data leakage.",
+  "Очистка должна быть скриптом, не «я посмотрел и удалил».",
+  "Для робастности используй RobustScaler / MAE вместо MSE — иногда лучше не трогать выбросы, а сделать модель устойчивее.",
+  "Не путай выброс и редкое, но валидное значение."
+],
+quiz:[
+  {q:"IQR это…",opt:["Q3-Q1","Q3-min","max-min","2σ"],correct:0,explain:"Межквартильный размах = Q3 − Q1."},
+  {q:"3σ-правило плохо работает при…",opt:["нормальном распределении","сильно скошенных распределениях","большой выборке","малой дисперсии"],correct:1,explain:"При скошенности 3σ-граница не симметрична относительно «массы» данных."},
+  {q:"Winsorization — это…",opt:["логарифмирование","замена выброса на граничное значение","удаление выброса","z-score"],correct:1,explain:"Винзоризация = clip к [Q1-1.5IQR, Q3+1.5IQR] или к перцентилям."},
+  {q:"В задаче обнаружения мошенничества выбросы…",opt:["надо удалить","и есть цель — их и ищем","заменить медианой","масштабировать"],correct:1,explain:"Фрод = редкое отклонение от нормы, удалять его — потерять задачу."}
+]
+},
+{
+id:6, block:"B. Подготовка данных", title:"Кодирование качественных признаков",
+tldr:"Алгоритмы работают с числами. Порядковые → Ordinal. Номинальные с малым числом категорий → OneHot. Много категорий → Target/Frequency или Embeddings. Target encoding обязательно делать out-of-fold.",
+intuition:"Номинальные категории не имеют порядка («Москва», «Берлин», «Токио»). Если закодировать их 0/1/2, модель решит, что Берлин «между» Москвой и Токио. OneHot убирает эту фантомную упорядоченность за счёт лишних колонок.",
+viz:{type:"html",code:`
+<div class="grid-eul">
+<div class="panel2 p-3">
+<div class="font-medium mb-2">OneHot</div>
+<table class="t"><tr><th>Cat</th><th>red</th><th>green</th><th>blue</th></tr>
+<tr><td>red</td><td>1</td><td>0</td><td>0</td></tr>
+<tr><td>green</td><td>0</td><td>1</td><td>0</td></tr>
+<tr><td>blue</td><td>0</td><td>0</td><td>1</td></tr></table>
+<div class="muted text-xs mt-1">Для номинальных, K&lt;15</div>
+</div>
+<div class="panel2 p-3">
+<div class="font-medium mb-2">Ordinal</div>
+<table class="t"><tr><th>Size</th><th>x</th></tr>
+<tr><td>S</td><td>0</td></tr><tr><td>M</td><td>1</td></tr><tr><td>L</td><td>2</td></tr></table>
+<div class="muted text-xs mt-1">Только для упорядоченных</div>
+</div>
+<div class="panel2 p-3">
+<div class="font-medium mb-2">Target (mean)</div>
+<table class="t"><tr><th>City</th><th>mean(y)</th></tr>
+<tr><td>Москва</td><td>0.34</td></tr>
+<tr><td>СПб</td><td>0.27</td></tr><tr><td>Казань</td><td>0.19</td></tr></table>
+<div class="muted text-xs mt-1">Опасно — нужен OOF + smoothing</div>
+</div>
+<div class="panel2 p-3">
+<div class="font-medium mb-2">Frequency</div>
+<table class="t"><tr><th>City</th><th>count/N</th></tr>
+<tr><td>Москва</td><td>0.41</td></tr>
+<tr><td>СПб</td><td>0.18</td></tr><tr><td>Казань</td><td>0.05</td></tr></table>
+<div class="muted text-xs mt-1">Для деревьев — окей</div>
+</div>
+</div>`},
+formulas:[
+  {tex:"\\text{enc}(c)=\\frac{n_c \\bar y_c + m\\bar y}{n_c + m}",explain:"target encoding со сглаживанием — для редких категорий тянем к глобальному среднему"}
+],
+pitfalls:[
+  "Label Encoding для номинальных признаков → искусственный порядок, ломает kNN/линейные модели.",
+  "Target encoding без out-of-fold = утечка цели.",
+  "OneHot + StandardScaler на бинарных колонках — обычно бессмысленно.",
+  "Категории, встречающиеся только в test → handle_unknown='ignore'.",
+  "Высокая cardinality + OneHot = взрыв размерности."
+],
+quiz:[
+  {q:"Размер S/M/L — какой кодировщик?",opt:["OneHot","Ordinal","Target","Hashing"],correct:1,explain:"Размер имеет порядок → Ordinal сохранит его."},
+  {q:"Цвет (red/green/blue), линейная регрессия. Лучший выбор?",opt:["LabelEncoder","OneHot","Ordinal","Frequency"],correct:1,explain:"Для номинальных в линейных моделях — OneHot."},
+  {q:"Главная угроза target encoding'а?",opt:["Медленный","Утечка цели","Не работает с числами","Только для деревьев"],correct:1,explain:"Без OOF — модель видит y_i при кодировании x_i."},
+  {q:"WoE используют чаще всего в…",opt:["NLP","скоринге","изображениях","RL"],correct:1,explain:"Weight of Evidence — стандарт в кредитном скоринге."}
+]
+},
+{
+id:7, block:"B. Подготовка данных", title:"Масштабирование признаков",
+tldr:"kNN, SVM, линейные модели с регуляризацией, нейросети, PCA — чувствительны к масштабу. Standard (z-score), MinMax (в [0,1]), Robust (по медиане и IQR — устойчив к выбросам), MaxAbs (для sparse). Деревья — не нужно.",
+intuition:"Если зарплата (тысячи) и возраст (десятки) в одной формуле, евклидово расстояние «слышит» только зарплату. Масштабирование делает признаки равноправными.",
+viz:{type:"chart",chartType:"scaling"},
+formulas:[
+  {tex:"x'=\\frac{x-\\mu}{\\sigma}",explain:"StandardScaler: центрирование + нормирование"},
+  {tex:"x'=\\frac{x-x_{\\min}}{x_{\\max}-x_{\\min}}",explain:"MinMax: в диапазон [0,1]; чувствителен к выбросам"},
+  {tex:"x'=\\frac{x-\\text{median}}{\\text{IQR}}",explain:"RobustScaler — устойчив к выбросам"}
+],
+pitfalls:[
+  "MinMax при наличии выбросов → большинство значений «сожмётся» к одной точке.",
+  "StandardScaler чувствителен к выбросам через μ и σ.",
+  "Деревья инвариантны к монотонным преобразованиям → не масштабируй.",
+  "Бинарные/OneHot масштабировать обычно не надо.",
+  "fit только на train."
+],
+quiz:[
+  {q:"Зарплата с тяжёлыми хвостами (выбросы справа). Какой scaler?",opt:["MinMax","Standard","Robust","MaxAbs"],correct:2,explain:"Robust — медиана и IQR устойчивы к выбросам."},
+  {q:"Sparse-матрица TF-IDF. Какой scaler сохраняет нули?",opt:["Standard","MinMax","MaxAbs","Robust"],correct:2,explain:"MaxAbs не центрирует, нули остаются нулями."},
+  {q:"Random Forest нужно масштабировать?",opt:["Да, всегда","Нет, инвариантен","Только бинарные","Только OneHot"],correct:1,explain:"Деревья смотрят на пороги по одному признаку — масштаб не важен."},
+  {q:"Какой scaler выходит за [0,1]?",opt:["MinMax","Standard","Normalizer","ни один"],correct:1,explain:"StandardScaler не ограничивает диапазон."}
+]
+},
+{
+id:8, block:"B. Подготовка данных", title:"Отбор признаков",
+tldr:"Три семейства методов: Filter (быстрая статистика — корреляция, χ², MI), Wrapper (RFE/forward/backward — дороже, учитывает взаимодействия), Embedded (Lasso, feature_importances, SHAP — встроены в обучение).",
+intuition:"Меньше признаков → меньше переобучения, быстрее обучение, проще интерпретация. Цель — выкинуть шум и дубли, оставить сигнал. Filter — оценивает каждый признак сам по себе. Wrapper — перебирает наборы. Embedded — модель сама указывает важных.",
+viz:{type:"mermaid",code:`graph TD
+A[Все признаки] --> B[Filter:<br/>VarianceThreshold,<br/>Pearson, χ², MI]:::f
+B --> C[Wrapper:<br/>RFE, Forward,<br/>Backward]:::w
+C --> D[Embedded:<br/>Lasso, FI, SHAP,<br/>Permutation]:::e
+D --> E[Выбранные]
+classDef f fill:#0ea5e9,color:#fff
+classDef w fill:#a78bfa,color:#fff
+classDef e fill:#22c55e,color:#000`},
+formulas:[
+  {tex:"I(X;Y)=H(Y)-H(Y|X)",explain:"Mutual Information — ловит нелинейные связи"},
+  {tex:"VIF_j=\\frac{1}{1-R_j^2}",explain:"VIF — мультиколлинеарность; >5–10 — проблема"}
+],
+pitfalls:[
+  "feature_importances_ в Random Forest смещены к признакам с высокой cardinality → используй permutation_importance.",
+  "Отбор по корреляции с y на всей выборке до split = data leakage.",
+  "Filter не ловит взаимодействия двух слабых признаков, дающих сильный.",
+  "RFE дорого при большом d — комбинируй с filter."
+],
+quiz:[
+  {q:"Какой метод УЧИТЫВАЕТ взаимодействия признаков?",opt:["VarianceThreshold","Pearson корреляция","RFE","χ²"],correct:2,explain:"Wrapper-методы (RFE) перебирают наборы — учитывают взаимодействия."},
+  {q:"Lasso относится к…",opt:["Filter","Wrapper","Embedded","Boosting"],correct:2,explain:"Lasso встроен в обучение — обнуляет коэффициенты неважных признаков."},
+  {q:"Что лучше «дефолтного» feature_importances_?",opt:["Pearson","permutation_importance","VarianceThreshold","ничего"],correct:1,explain:"Permutation importance измеряет реальное падение метрики при перестановке признака."},
+  {q:"Mutual Information сильна тем, что…",opt:["быстрее всех","ловит нелинейные связи","требует мало данных","параметрическая"],correct:1,explain:"MI = взаимная информация, видит любые статистические зависимости."}
+]
+},
+{
+id:9, block:"B. Подготовка данных", title:"Декорреляция признаков",
+tldr:"Скоррелированные признаки → мультиколлинеарность → нестабильные коэффициенты в линейке, дублируется информация, медленная сходимость. Лечится удалением одного из пары, PCA, whitening или Ridge-регуляризацией.",
+intuition:"Если у тебя «вес в кг» и «вес в фунтах» — это один и тот же признак. Линейка не знает, какому коэффициенту верить, и сходит с ума. Декорреляция — сделать признаки «ортогональными» в информационном смысле.",
+viz:{type:"mermaid",code:`graph LR
+A[Скоррелированные<br/>признаки] --> B{Что делать?}
+B --> C[Удалить дубль<br/>при r > 0.9]
+B --> D[PCA →<br/>ортогональные оси]
+B --> E[Whitening<br/>cov = I]
+B --> F[Ridge<br/>стабилизация]`},
+formulas:[
+  {tex:"r=\\frac{\\text{Cov}(X,Y)}{\\sigma_X\\sigma_Y}",explain:"Pearson — линейная связь"},
+  {tex:"VIF_j=\\frac{1}{1-R_j^2}",explain:"VIF>5 — сильная мультиколлинеарность"},
+  {tex:"Z=XU\\Lambda^{-1/2}",explain:"PCA-whitening: единичная ковариация"}
+],
+pitfalls:[
+  "Корреляция ≠ зависимость (Anscombe's quartet).",
+  "Spearman — монотонная нелинейная связь.",
+  "Перед whitening — обязательно центрирование.",
+  "Удаляй из пары тот признак, который менее связан с y."
+],
+quiz:[
+  {q:"VIF=12 для признака — что делать?",opt:["Оставить, всё ок","Удалить или объединить","Заменить нулём","Прологарифмировать"],correct:1,explain:"VIF>5–10 — серьёзная мультиколлинеарность."},
+  {q:"PCA создаёт оси…",opt:["максимизирующие корреляцию","ортогональные, по убыванию дисперсии","случайные","совпадающие с признаками"],correct:1,explain:"Главные компоненты — ортогональные направления макс. дисперсии."},
+  {q:"Когда стоит использовать Spearman?",opt:["Линейная связь","Монотонная нелинейная связь","Нет связи","Категориальные"],correct:1,explain:"Спирмен = Пирсон от рангов, ловит монотонную нелинейность."}
+]
+},
+{
+id:10, block:"B. Подготовка данных", title:"PCA — главные компоненты",
+tldr:"PCA проецирует данные на k ортогональных осей с максимальной дисперсией. Это и понижение размерности, и декорреляция, и подавление шума. Эквивалентно SVD центрированной матрицы.",
+intuition:"Облако точек вытянуто вдоль некоторого направления — оно и есть первая главная компонента. Проекция теряет минимум информации, потому что вдоль PC1 разброс максимален. Так и с PC2 ⊥ PC1, и т.д.",
+viz:{type:"chart",chartType:"pcaScree"},
+formulas:[
+  {tex:"\\Sigma=\\frac{1}{N-1}\\tilde X^\\top \\tilde X",explain:"ковариационная матрица центрированных данных"},
+  {tex:"\\Sigma=U\\Lambda U^\\top,\\;Z=\\tilde X U_k",explain:"спектр. разложение → проекция на k компонент"},
+  {tex:"\\text{EVR}_k=\\lambda_k\\Big/\\sum_j\\lambda_j",explain:"доля объяснённой дисперсии"}
+],
+pitfalls:[
+  "Без центрирования первая компонента может «уйти» к среднему — теряется смысл.",
+  "PCA чувствителен к масштабу — масштабируй сначала.",
+  "PCA — линейный метод, для нелинейных структур нужны t-SNE/UMAP/autoencoder.",
+  "k выбирают по EVR≥0.9–0.95 или scree-локтю."
+],
+quiz:[
+  {q:"Что максимизирует первая главная компонента?",opt:["Корреляцию с y","Дисперсию проекции","Энтропию","Ошибку"],correct:1,explain:"PC1 — направление макс. дисперсии."},
+  {q:"Перед PCA обязательно…",opt:["логарифмировать","центрировать","перемешивать","умножать на 10"],correct:1,explain:"Иначе главная ось может «съехать» к среднему."},
+  {q:"Что показывает scree plot?",opt:["Время обучения","Собственные значения по убыванию","Корреляции","ROC"],correct:1,explain:"Scree = собственные значения; «локоть» подсказывает k."},
+  {q:"PCA подходит для нелинейных многообразий?",opt:["Да","Нет, нужен t-SNE/UMAP","Только с ядром","Только с метками"],correct:1,explain:"PCA линейный; для нелинейных — kernel PCA или t-SNE/UMAP."}
+]
+},
+{
+id:11, block:"B. Подготовка данных", title:"Аугментация и сэмплинг",
+tldr:"При дисбалансе классов — undersampling (выкинуть мажор), oversampling (продублировать минор), SMOTE (синтетические интерполяции в minor классе), class_weight (взвешивание loss). Аугментация — расширение train (повороты, шум, парафраз) для борьбы с переобучением.",
+intuition:"Если 99% — норма и 1% — фрод, accuracy 99% даёт даже модель «всегда норма». Нужно либо балансировать выборку, либо считать loss с весами, либо менять метрику. Аугментация — другая история: создаём новые сэмплы из имеющихся, чтобы модель видела вариативность.",
+viz:{type:"mermaid",code:`graph TD
+A[Дисбаланс<br/>99% / 1%] --> B[Undersampling<br/>обрезать мажор]
+A --> C[Oversampling<br/>дублировать минор]
+A --> D[SMOTE<br/>синтетические<br/>интерполяции]
+A --> E[class_weight<br/>в loss]
+F[Мало данных<br/>для DL] --> G[Аугментация:<br/>повороты, crop,<br/>шум, dropout, mixup]`},
+formulas:[
+  {tex:"x_{\\text{new}}=x_i+\\lambda(x_{nn}-x_i),\\;\\lambda\\sim U(0,1)",explain:"SMOTE: новый сэмпл — на отрезке между x_i и его соседом из minor класса"}
+],
+pitfalls:[
+  "SMOTE применяй ТОЛЬКО к train, после split.",
+  "Undersampling выкидывает информацию — рискованно при и так малой выборке.",
+  "Аугментация изображений: не вращай 9 в 6 при OCR.",
+  "При дисбалансе смотри на recall, F1, balanced accuracy, PR-AUC, не на accuracy.",
+  "class_weight простая альтернатива SMOTE без раздувания выборки."
+],
+quiz:[
+  {q:"99% / 1% — accuracy 99% означает…",opt:["модель отличная","ничего, может предсказывать только мажор","надо переобучить","метрика битая"],correct:1,explain:"Тривиальный baseline даёт 99%. Смотри recall/F1."},
+  {q:"SMOTE создаёт сэмплы…",opt:["копированием","интерполяцией между minor-объектом и соседом","случайным шумом","удалением мажора"],correct:1,explain:"x_new = x_i + λ(x_nn - x_i)."},
+  {q:"Когда применять SMOTE?",opt:["До train/test split","После split, только к train","К test","После обучения"],correct:1,explain:"Иначе синтетика «утечёт» в test."},
+  {q:"class_weight='balanced' в sklearn делает…",opt:["upsampling","downsampling","взвешивает loss обратно частоте","ничего"],correct:2,explain:"Loss мажоритарного класса умножается на меньший вес."}
+]
+},
+
+/* ===== БЛОК C. Регрессия ===== */
+{
+id:12, block:"C. Регрессия", title:"Линейная регрессия и МНК",
+tldr:"Модель ŷ = w·x + b. МНК минимизирует сумму квадратов ошибок Q = ‖y − Xw‖². Решение в закрытой форме ŵ = (XᵀX)⁻¹Xᵀy (если XᵀX невырожденная), иначе через псевдообращение.",
+intuition:"Прямая, минимизирующая сумму квадратов вертикальных расстояний от точек. Квадраты — потому что: симметрия, гладкая (диффренцируема), штрафует большие ошибки сильнее малых, статистически — MLE при гауссовом шуме.",
+viz:{type:"chart",chartType:"linregFit"},
+formulas:[
+  {tex:"Q(w)=\\frac{1}{N}\\|y-Xw\\|^2",explain:"квадратичный функционал"},
+  {tex:"\\nabla_w Q=\\frac{2}{N}X^\\top(Xw-y)=0",explain:"градиент → нормальное уравнение"},
+  {tex:"\\hat w=(X^\\top X)^{-1}X^\\top y",explain:"закрытое решение"}
+],
+pitfalls:[
+  "Если признаки коррелированы — XᵀX почти вырождена, веса нестабильны → используй Ridge или SVD.",
+  "Не забудь добавить столбец единиц для bias, либо центрируй y.",
+  "Линейная регрессия чувствительна к выбросам (квадрат штрафует сильно) — иногда нужна Huber или MAE.",
+  "Гомоскедастичность шума — предположение OLS; нарушение → доверительные интервалы неправильны."
+],
+quiz:[
+  {q:"Что минимизирует МНК?",opt:["Сумму ошибок","Сумму |ошибок|","Сумму квадратов ошибок","Максимум ошибки"],correct:2,explain:"Q=Σ(y−ŷ)²."},
+  {q:"Когда не работает (XᵀX)⁻¹?",opt:["Малая N","XᵀX вырождена / коллинеарность","Большой шум","Бинарные признаки"],correct:1,explain:"При коллинеарности XᵀX сингулярна — нужен Ridge или псевдообращение."},
+  {q:"При гауссовом шуме МНК = …",opt:["MAP","MLE","Bayes","ничего особенного"],correct:1,explain:"OLS — это maximum likelihood при ε~N(0,σ²)."},
+  {q:"Линейная регрессия чувствительна к выбросам потому что…",opt:["использует абс. значения","квадрат сильно штрафует","нет регуляризации","большая размерность"],correct:1,explain:"Большая ошибка → её квадрат «утягивает» прямую."}
+]
+},
+{
+id:13, block:"C. Регрессия", title:"Метрики качества регрессии",
+tldr:"MSE/RMSE — стандарт, штрафуют большие ошибки сильнее. MAE — устойчив к выбросам. MAPE — в процентах (но взрывается при y≈0). R² ∈ (−∞,1] — доля объяснённой дисперсии (R²<0 значит модель хуже среднего).",
+intuition:"R² = 1 − (наша ошибка) / (ошибка модели «всегда среднее»). 1 = идеально, 0 = не лучше среднего, <0 = катастрофа. RMSE и MAE — в единицах целевой переменной, удобны для бизнес-интерпретации.",
+viz:{type:"chart",chartType:"r2Demo"},
+formulas:[
+  {tex:"\\text{MSE}=\\tfrac{1}{N}\\sum(y_i-\\hat y_i)^2,\\;\\text{RMSE}=\\sqrt{\\text{MSE}}",explain:"квадратичная ошибка"},
+  {tex:"\\text{MAE}=\\tfrac{1}{N}\\sum|y_i-\\hat y_i|",explain:"абсолютная — устойчива к выбросам"},
+  {tex:"R^2=1-\\frac{\\sum(y_i-\\hat y_i)^2}{\\sum(y_i-\\bar y)^2}",explain:"доля объяснённой дисперсии"},
+  {tex:"R^2_{\\text{adj}}=1-(1-R^2)\\frac{N-1}{N-d-1}",explain:"adjusted — штрафует за лишние признаки"}
+],
+pitfalls:[
+  "MAPE взрывается при y близких к 0; используй sMAPE или MAE.",
+  "R²<0 — модель хуже, чем «всегда среднее».",
+  "RMSE сравнивай только в одних и тех же единицах.",
+  "Adjusted R² важно при подборе числа признаков — обычное R² всегда растёт."
+],
+quiz:[
+  {q:"R²=−0.2 — это…",opt:["ошибка","модель хуже среднего","всё ок","нормально для регрессии"],correct:1,explain:"R² < 0 — даже среднее предсказывает лучше."},
+  {q:"Какая метрика устойчива к выбросам?",opt:["MSE","MAE","RMSE","R²"],correct:1,explain:"MAE линейна — большие ошибки не возводятся в квадрат."},
+  {q:"MAPE плох когда…",opt:["y большое","y близко к 0","выборка большая","классов много"],correct:1,explain:"|y_i − ŷ| / y_i → ∞ при y_i → 0."},
+  {q:"Что значит RMSE=2.5 для прогноза цены?",opt:["модель ошибается на 2.5 относит. ед.","в среднем ошибается на ~2.5 в единицах y","ровно 2.5%","зависит от MAE"],correct:1,explain:"RMSE — в единицах y, грубо «средняя» ошибка."}
+]
+},
+{
+id:14, block:"C. Регрессия", title:"Регуляризация: Ridge, Lasso, Elastic Net",
+tldr:"Добавляем штраф за веса: Ridge — λ‖w‖² (плавно уменьшает все), Lasso — λ‖w‖₁ (зануляет неважные → отбор), Elastic Net — комбинация. λ — гиперпараметр, подбирается CV.",
+intuition:"Без регуляризации модель может «переборщить» с большими весами на коррелированных признаках. Ridge — мягко тянет всё к нулю. Lasso — за счёт геометрии ромба углы попадают на оси, поэтому одни веса становятся ровно нулём. Elastic — компромисс.",
+viz:{type:"chart",chartType:"l1l2"},
+formulas:[
+  {tex:"\\text{Ridge: }\\hat w=(X^\\top X+\\lambda I)^{-1}X^\\top y",explain:"закрытое решение, всегда обратимо"},
+  {tex:"\\text{Lasso: }\\min_w \\|y-Xw\\|^2+\\lambda\\|w\\|_1",explain:"нет closed-form; координатный спуск"},
+  {tex:"\\text{Elastic: }\\lambda_1\\|w\\|_1+\\lambda_2\\|w\\|_2^2",explain:"L1 + L2"}
+],
+pitfalls:[
+  "Регуляризация требует масштабирования — иначе штрафуются «крупные по числу» признаки.",
+  "Lasso при сильно коррелированных признаках выбирает один и обнуляет остальных — иногда «случайным» образом.",
+  "λ слишком большой → underfitting; слишком маленький → нет эффекта.",
+  "Bias не штрафуй (sklearn делает это автоматически)."
+],
+quiz:[
+  {q:"Какая регуляризация даёт разреженность (точные нули)?",opt:["Ridge","Lasso","Ни одна","Обе"],correct:1,explain:"L1 имеет острые углы на осях → решения ложатся на них."},
+  {q:"Ridge при коллинеарности…",opt:["проваливается","стабилизирует, делая XᵀX+λI обратимой","хуже OLS","зависит от данных"],correct:1,explain:"+λI делает матрицу хорошо обусловленной."},
+  {q:"λ растёт — что происходит с весами?",opt:["растут","→ к нулю","не меняются","становятся отрицательными"],correct:1,explain:"Чем больше штраф, тем сильнее веса прижимаются к нулю."},
+  {q:"Elastic Net лучше Lasso когда…",opt:["мало признаков","группы коррелированных признаков","нет шума","много шума"],correct:1,explain:"L2-часть «делит» вес между скоррелированными, L1 — отбирает."}
+]
+},
+{
+id:15, block:"C. Регрессия", title:"Логистическая регрессия",
+tldr:"Линейная модель + сигмоида = вероятность класса. Минимизируем бинарную кросс-энтропию (BCE / log-loss). Многоклассовая — softmax + cross-entropy.",
+intuition:"Логистическая регрессия — это не «регрессия», а классификация. Линейная функция w·x+b проходит через сигмоиду, выдавая P(y=1|x) ∈ [0,1]. Граница решения — гиперплоскость w·x+b=0.",
+viz:{type:"chart",chartType:"sigmoid"},
+formulas:[
+  {tex:"\\sigma(z)=\\frac{1}{1+e^{-z}},\\;\\sigma'(z)=\\sigma(z)(1-\\sigma(z))",explain:"сигмоида"},
+  {tex:"p(y=1|x)=\\sigma(w^\\top x+b)",explain:"вероятность положительного класса"},
+  {tex:"Q=-\\tfrac{1}{N}\\sum[y_i\\log\\hat p_i+(1-y_i)\\log(1-\\hat p_i)]",explain:"BCE / log-loss"},
+  {tex:"\\nabla_w Q=\\tfrac{1}{N}X^\\top(\\hat p-y)",explain:"градиент — красивый и удобный"}
+],
+pitfalls:[
+  "Не путай с линейной регрессией: ответ — вероятность, не число.",
+  "Класс предсказывается через threshold (по умолчанию 0.5), но его можно сдвигать ради recall/precision.",
+  "Сильно несбалансированные классы → используй class_weight или меняй threshold.",
+  "Для многих классов — softmax + cross-entropy."
+],
+quiz:[
+  {q:"σ(z) пробегает значения в …",opt:["[−1,1]","[0,1]","ℝ","[0,∞)"],correct:1,explain:"Сигмоида ограничена (0,1), отсюда вероятность."},
+  {q:"Какой loss для логистической?",opt:["MSE","Hinge","Cross-entropy / log-loss","MAE"],correct:2,explain:"BCE = MLE при Бернулли."},
+  {q:"σ′(z) =",opt:["σ(z)","σ(z)(1−σ(z))","1−σ(z)","z·σ(z)"],correct:1,explain:"Удобное свойство для backprop."},
+  {q:"Многоклассовая логистическая — это…",opt:["несколько one-vs-rest","softmax + cross-entropy","Naive Bayes","SVM"],correct:1,explain:"Softmax даёт вероятности по K классам."}
+]
+},
+{
+id:16, block:"C. Регрессия", title:"Нелинейная регрессия",
+tldr:"Когда зависимость y от x явно не прямая — используем: полиномиальные признаки, базисные функции (RBF, сплайны), kernel-методы (SVR с ядром), деревья, нейросети. Главный риск — переобучение при высокой степени полинома.",
+intuition:"Линейная регрессия линейна по w, не по x. Если добавить признаки x², x³, sin(x), ln(x) — это всё ещё линейная регрессия (по новым признакам), но кривая на исходной оси. Деревья и нейросети — иной механизм нелинейности.",
+viz:{type:"chart",chartType:"polyOverfit"},
+formulas:[
+  {tex:"\\hat y=w_0+w_1 x+w_2 x^2+\\dots+w_p x^p",explain:"полиномиальная регрессия степени p"},
+  {tex:"\\hat y=\\sum_k w_k\\phi_k(x)",explain:"общая модель с базисными функциями φ_k"}
+],
+pitfalls:[
+  "Высокая степень полинома → дикое переобучение, осцилляции на краях (Runge).",
+  "Полиномы степени >5–7 редко бывают полезны — используй сплайны или регуляризацию.",
+  "Перед полиномиальными признаками масштабируй вход.",
+  "Извлечь интерпретируемость из нелинейных моделей сложнее — иногда лучше простая модель."
+],
+quiz:[
+  {q:"Полиномиальная регрессия 1-й степени — это…",opt:["константа","обычная линейная","кубическая","квадратичная"],correct:1,explain:"degree=1 = линейная регрессия."},
+  {q:"degree=15, мало точек — что произойдёт?",opt:["идеальный fit","переобучение, осцилляции на краях","ошибка","ускорение"],correct:1,explain:"Высокая степень + мало данных = классический overfitting."},
+  {q:"Базисные функции (RBF, сплайны) — это…",opt:["типы регуляризации","нелинейные преобразования входа","оптимизаторы","метрики"],correct:1,explain:"Они расширяют пространство признаков, оставляя модель линейной по w."}
+]
+},
+
+/* ===== БЛОК D. Классификация и кластеризация ===== */
+{
+id:17, block:"D. Классификация и кластеризация", title:"Теорема Байеса",
+tldr:"P(y|x) = P(x|y)·P(y) / P(x). Апостериор ∝ правдоподобие × априор. На этом построен байесовский классификатор: arg max P(c)·P(x|c).",
+intuition:"До эксперимента у тебя априор P(y) — то, что ты «верил». После эксперимента (увидел x) — апостериор P(y|x). Чем больше данных, тем меньше влияет априор. Классический пример: тест на болезнь с false-positive rate.",
+viz:{type:"mermaid",code:`graph LR
+A[Априор<br/>P y] --> P[Апостериор<br/>P y x]
+B[Правдоподобие<br/>P x y] --> P
+C[Маргинал<br/>P x] --> P
+P --> D[Решение:<br/>argmax P c P x c]`},
+formulas:[
+  {tex:"P(y|x)=\\frac{P(x|y)P(y)}{P(x)}",explain:"теорема Байеса"},
+  {tex:"\\hat y=\\arg\\max_c P(c)\\,P(x|c)",explain:"знаменатель P(x) одинаков — игнорируем"}
+],
+pitfalls:[
+  "При редком классе P(y) маленький, и даже сильное правдоподобие не «перевешивает» — нужны корректные априоры.",
+  "Численная устойчивость: складывай log-вероятности, не перемножай.",
+  "Полная P(x|c) для сложных x требует много параметров — отсюда «наивный» байес."
+],
+quiz:[
+  {q:"P(y|x) ∝ …",opt:["P(x)·P(y)","P(x|y)·P(y)","P(x|y)·P(x)","P(y|x)"],correct:1,explain:"Числитель: правдоподобие × априор."},
+  {q:"Зачем игнорируем P(x) при argmax?",opt:["оно нулевое","одинаково для всех классов","всегда 1","трудно посчитать"],correct:1,explain:"Не зависит от c — не влияет на argmax."},
+  {q:"Тест: P(пол.|болен)=0.99, P(пол.|здоров)=0.05, P(болен)=0.001. Доминирует…",opt:["правдоподобие","априор","маргинал","ничего"],correct:1,explain:"Очень малый априор «убивает» апостериор — почти все позитивные тесты ложные."}
+]
+},
+{
+id:18, block:"D. Классификация и кластеризация", title:"Наивный Байес",
+tldr:"Предположение «наивности»: признаки условно независимы при заданном классе → P(x|c) = ∏P(x_j|c). Простой, быстрый, хорошо для текстов. Виды: Гауссовский, Мультиномиальный, Бернуллиевский. Лапласово сглаживание против нулей.",
+intuition:"Условная независимость признаков почти никогда не выполняется. Но даже при нарушении NB удивительно хорошо классифицирует — потому что для argmax нам нужна правильная относительная разница вероятностей, а не точные значения.",
+viz:{type:"mermaid",code:`graph TD
+A[x = слова в письме] --> B[P spam x prod P w_i spam]
+A --> C[P ham x prod P w_i ham]
+B --> D{argmax}
+C --> D
+D --> E[класс]`},
+formulas:[
+  {tex:"P(x|c)\\approx\\prod_j P(x_j|c)",explain:"наивное предположение"},
+  {tex:"\\hat p_{jc}=\\frac{n_{jc}+\\alpha}{n_c+\\alpha V}",explain:"Лапласово сглаживание (α=1)"},
+  {tex:"P(x_j|c)=\\mathcal{N}(x_j;\\mu_{jc},\\sigma_{jc}^2)",explain:"Гауссовский NB для непрерывных признаков"}
+],
+pitfalls:[
+  "Без сглаживания одно отсутствующее слово в классе → P(x|c)=0 → катастрофа.",
+  "NB даёт плохо калиброванные вероятности — но классы предсказывает часто хорошо.",
+  "Корреляция признаков нарушает «наивность» — на классификацию влияет умеренно, на P(y|x) — сильно.",
+  "Логарифмируй: складывай logP, не перемножай."
+],
+quiz:[
+  {q:"«Наивность» — это…",opt:["простая реализация","условная независимость признаков","нет регуляризации","байесовость"],correct:1,explain:"P(x|c) = ∏P(x_j|c)."},
+  {q:"Зачем Лапласово сглаживание?",opt:["скорость","избежать P=0 для редких слов","точность","масштабирование"],correct:1,explain:"Иначе одно неизвестное слово обнуляет всё произведение."},
+  {q:"Гауссовский NB подходит для…",opt:["текстов","количественных признаков","изображений","временных рядов"],correct:1,explain:"Моделирует P(x_j|c) как нормальное распределение."},
+  {q:"Мультиномиальный NB — стандарт для…",opt:["NLP / bag-of-words","изображений","сенсоров","табличных смешанных"],correct:0,explain:"Хорошо считает счётчики слов."}
+]
+},
+{
+id:19, block:"D. Классификация и кластеризация", title:"k-NN — ближайшие соседи",
+tldr:"Ленивый алгоритм: запоминает train, на запросе ищет k ближайших соседей и голосует (или усредняет для регрессии). Гиперпараметры — k, метрика, веса. Классическое k ≈ √N.",
+intuition:"«Скажи, кто твой сосед, и я скажу, кто ты». Маленькое k — изломанная граница, переобучение. Большое k — гладкая, но размытая. Метрика выбирается под природу данных: евклидова для физических координат, косинусная для текстов.",
+viz:{type:"chart",chartType:"knnDecision"},
+formulas:[
+  {tex:"\\hat y(x)=\\arg\\max_c\\sum_{i\\in N_k(x)} w_i\\mathbb{1}[y_i=c]",explain:"взвешенное голосование соседей"},
+  {tex:"w_i=1\\;\\text{(uniform)}\\;\\text{или}\\;w_i=1/d(x,x_i)\\;\\text{(distance)}",explain:"веса соседей"},
+  {tex:"\\hat y=\\frac{\\sum w_i y_i}{\\sum w_i}",explain:"для регрессии — средневзвешенное"}
+],
+pitfalls:[
+  "Чувствителен к масштабу — обязательно scaling.",
+  "Проклятие размерности: при большом d все точки одинаково «далеко».",
+  "Медленный inference: O(N·d) на запрос; для больших N — KD-tree, Ball-tree, ANN.",
+  "Категориальные признаки требуют специальной метрики (Hamming, Gower)."
+],
+quiz:[
+  {q:"k=1 — что характерно?",opt:["плавная граница","изломанная, переобучение","робастно к шуму","случайные ответы"],correct:1,explain:"k=1 запоминает каждый пример, шум становится границей."},
+  {q:"Перед kNN обязательно…",opt:["обучить веса","масштабировать","факторизовать","поделить на k"],correct:1,explain:"kNN основан на расстояниях — масштаб критичен."},
+  {q:"k → ∞ — модель…",opt:["переобучается","становится константной (мажоритарный класс)","быстрее","лучше"],correct:1,explain:"При k=N все запросы дают мажоритарный класс."},
+  {q:"Косинусная метрика хороша для…",opt:["изображений","текстов / TF-IDF","временных рядов","сенсоров"],correct:1,explain:"Для разреженных длинно-разноразмерных векторов важно направление, не модуль."}
+]
+},
+{
+id:20, block:"D. Классификация и кластеризация", title:"Деревья решений: понятие",
+tldr:"Бинарное дерево, в каждой внутренней вершине — условие на признак (x_j ≤ τ), в листе — предсказание (класс или число). Жадно строится сверху вниз по критериям Gini/entropy/MSE.",
+intuition:"Пошаговый набор if-else, каждый шаг разбивает данные на «более чистые» подгруппы. Интерпретируемо как блок-схема. Слабый ученик в одиночку, но идеальная база для ансамблей (RF, GBM).",
+viz:{type:"mermaid",code:`graph TD
+R[Income gt 50k?] --> Y[Age gt 30?]
+R --> N[Low risk]
+Y --> Y2[Owns home?]
+Y --> N2[Medium]
+Y2 --> H[Low risk]
+Y2 --> H2[Medium]`},
+formulas:[
+  {tex:"\\text{Gini}(S)=1-\\sum_c p_c^2",explain:"мера неоднородности (0 = чистый узел)"},
+  {tex:"\\text{Entropy}(S)=-\\sum_c p_c\\log_2 p_c",explain:"альтернативный критерий"},
+  {tex:"\\text{IG}(S,A)=H(S)-\\sum_v\\tfrac{|S_v|}{|S|}H(S_v)",explain:"Information Gain — то, что максимизируем"}
+],
+pitfalls:[
+  "Без регуляризации (max_depth, min_samples_leaf) дерево всегда переобучается.",
+  "Деревья нестабильны: малое изменение train → другая структура. Лечится ансамблями.",
+  "Линейные зависимости плохо ловят (нужна лестница).",
+  "Жадный алгоритм — может пропустить глобально оптимальное разбиение."
+],
+quiz:[
+  {q:"Gini=0 означает…",opt:["максимум смеси","узел чистый (один класс)","ошибка","2 класса поровну"],correct:1,explain:"Все объекты одного класса → Gini=0."},
+  {q:"Какой критерий жадно максимизируется при разбиении?",opt:["Loss","Information Gain","Accuracy","Бутстрэп"],correct:1,explain:"Уменьшение примеси (entropy/Gini) максимально."},
+  {q:"Слабая сторона дерева в одиночку?",opt:["медленно","нестабильно, склонно к переобучению","нельзя интерпретировать","только бинарное"],correct:1,explain:"High variance — лечится ансамблями."},
+  {q:"Дерево без ограничений на train…",opt:["обычно достигает ~0 ошибок (вырастает до отдельных листьев)","всегда лучшая модель","недообучается","не существует"],correct:0,explain:"Может вырасти до листьев с одним объектом, идеально fit'ится к train — отсюда переобучение."}
+]
+},
+{
+id:21, block:"D. Классификация и кластеризация", title:"Построение дерева — алгоритм",
+tldr:"Для каждой вершины: перебор признаков и порогов, выбор разбиения с максимальным IG (или минимальным Gini после взвешивания). Рекурсия до критерия остановки. Для регрессии критерий — снижение MSE.",
+intuition:"Жадный нисходящий алгоритм — на каждом шаге выбираем «лучшее здесь и сейчас» разбиение, не заглядывая вперёд. Поэтому глобально может проиграть, зато быстро. Алгоритмы: ID3 (entropy), C4.5, CART (Gini, бинарные деревья).",
+viz:{type:"mermaid",code:`graph TD
+A[Корень - все объекты] --> B[Перебор признак x_j порог tau]
+B --> C[Считаем IG для каждого]
+C --> D[Выбираем лучшее]
+D --> E[Разбиваем на 2 узла]
+E --> F[Стоп - чистый узел max_depth min_samples]
+F --> G[Лист = среднее или мажор класс]`},
+formulas:[
+  {tex:"\\Delta=\\text{Gini}(S)-\\sum_v \\tfrac{|S_v|}{|S|}\\text{Gini}(S_v)",explain:"уменьшение Gini при разбиении"},
+  {tex:"\\text{MSE-split}=\\text{MSE}(S)-\\sum_v\\tfrac{|S_v|}{|S|}\\text{MSE}(S_v)",explain:"для регрессии"}
+],
+pitfalls:[
+  "Перебор всех порогов для непрерывного признака — O(N log N) на признак на узел.",
+  "Категориальные признаки в CART — бинаризуются по подмножествам.",
+  "Без stratify малые классы могут пропасть в split.",
+  "Стоп-условия — главный способ контроля сложности (см. Q22)."
+],
+quiz:[
+  {q:"Что выбирается при разбиении узла?",opt:["случайный признак","признак и порог с макс. IG","самый длинный признак","последний признак"],correct:1,explain:"Жадная оптимизация по уменьшению примеси."},
+  {q:"CART — это…",opt:["Алгоритм бустинга","Бинарные деревья по Gini","Множественный split","ансамбль"],correct:1,explain:"Classification And Regression Trees, Breiman."},
+  {q:"Для регрессии критерий — это…",opt:["Gini","Entropy","MSE / variance reduction","ROC"],correct:2,explain:"В листе — среднее, критерий — снижение MSE."},
+  {q:"Жадный алгоритм может…",opt:["всегда находить оптимум","застрять в локальном оптимуме","не работать","быть недетерминированным"],correct:1,explain:"Локально лучшее ≠ глобально лучшему."}
+]
+},
+{
+id:22, block:"D. Классификация и кластеризация", title:"Регуляризация деревьев",
+tldr:"Pre-pruning: ограничения при росте (max_depth, min_samples_leaf, max_leaf_nodes, min_impurity_decrease). Post-pruning: cost-complexity (α-pruning) — удаляем поддеревья, минимизируя Q(T)+α·|T|.",
+intuition:"Без ограничений дерево вырастет до отдельного листа на каждый объект — train-loss=0, test-loss катастрофа. Регуляризация = «не даём расти слишком глубоко» (pre) или «срезаем лишнее» (post).",
+viz:{type:"chart",chartType:"depthOverfit"},
+formulas:[
+  {tex:"C_\\alpha(T)=\\sum_{t\\in\\text{leaves}}Q(t)+\\alpha|T|",explain:"cost-complexity: качество + штраф за число листьев"}
+],
+pitfalls:[
+  "max_depth=None → переобучение почти гарантировано.",
+  "Слишком жёсткие ограничения → underfitting.",
+  "α в pruning подбирается CV.",
+  "В sklearn ccp_alpha делает post-pruning."
+],
+quiz:[
+  {q:"max_depth ↑ → bias и variance…",opt:["оба ↑","оба ↓","bias ↓, variance ↑","bias ↑, variance ↓"],correct:2,explain:"Глубже — гибче (меньше bias), но и сильнее переобучается."},
+  {q:"Cost-Complexity Pruning штрафует за…",opt:["глубину","число листьев","скорость","accuracy"],correct:1,explain:"|T| — число листьев."},
+  {q:"Pre-pruning vs post-pruning?",opt:["ограничения при росте дерева vs обрезка после полного построения","до и после inference","до и после feature selection","два названия одного"],correct:0,explain:"Pre — не даёт расти (max_depth и пр.); post — режет уже выросшее (ccp_alpha)."},
+  {q:"min_samples_leaf=1 — это…",opt:["осторожно","экстремально мягкое ограничение → переобучение","надёжно","оптимально"],correct:1,explain:"Каждый объект может оказаться отдельным листом."}
+]
+},
+{
+id:23, block:"D. Классификация и кластеризация", title:"SVM — метод опорных векторов",
+tldr:"Ищем гиперплоскость с максимальным зазором между классами. Зазор = 2/‖w‖. Мягкий зазор: ‖w‖² + C·Σξ_i (C — компромисс зазор/ошибки). Ядро (kernel trick) — нелинейная граница без явного перехода в высокую размерность.",
+intuition:"Двух точек хватит, чтобы провести прямую — но мы хотим прямую, у которой больше всего «места» с обеих сторон. Только опорные вектора (точки на границе зазора) определяют решение. Ядро — способ работать в нелинейном пространстве, считая только скалярные произведения.",
+viz:{type:"chart",chartType:"svmMargin"},
+formulas:[
+  {tex:"\\min\\tfrac{1}{2}\\|w\\|^2+C\\sum\\xi_i,\\;y_i(w^\\top x_i+b)\\ge 1-\\xi_i",explain:"мягкий зазор — оптимизация"},
+  {tex:"\\mathcal{L}=\\max(0,1-y_i(w^\\top x_i+b))",explain:"hinge loss"},
+  {tex:"K(x,y)=\\exp(-\\gamma\\|x-y\\|^2)",explain:"RBF-ядро — самое популярное"},
+  {tex:"\\hat y(x)=\\text{sign}\\big(\\sum_i\\alpha_i y_i K(x_i,x)+b\\big)",explain:"предсказание через ядра"}
+],
+pitfalls:[
+  "Чувствителен к масштабу — обязательно scaling.",
+  "C большой → жёсткий зазор, переобучение; C маленький → мягкий, недообучение.",
+  "γ в RBF: большой γ — узкие шары вокруг точек (переобучение), маленький — почти линейный.",
+  "На больших датасетах (>100k) — медленный, бери LinearSVM."
+],
+quiz:[
+  {q:"Зазор у SVM — это…",opt:["1/‖w‖","2/‖w‖","‖w‖","‖w‖²"],correct:1,explain:"Margin = 2/‖w‖, поэтому минимизируем ‖w‖²."},
+  {q:"Большой C — это…",opt:["мягкий зазор","жёсткий зазор → переобучение","больше регуляризации","меньше точек"],correct:1,explain:"Большой штраф за нарушения = жёсткий margin."},
+  {q:"Опорные вектора — это…",opt:["центры кластеров","точки на/в зазоре","выбросы","любые точки"],correct:1,explain:"Только они влияют на решение (α_i ≠ 0)."},
+  {q:"Kernel trick позволяет…",opt:["не считать веса","работать в высокой размерности через K(x,y) без явного φ","ускорить inference","заменить SVM на kNN"],correct:1,explain:"Все вычисления — через скалярные произведения K."}
+]
+},
+{
+id:24, block:"D. Классификация и кластеризация", title:"Кластеризация: меры близости",
+tldr:"Задача — разбить объекты на группы без меток. Меры близости: евклидова, манхэттенская, минковский, Чебышёва, косинусная, Махаланобиса. Выбор зависит от природы признаков.",
+intuition:"Расстояние — это «непохожесть». Евклид — обычная геометрия. Манхэттен — по сетке улиц. Косинус — угол, не модуль (для текстов). Махаланобис — учитывает корреляции и дисперсии (вытянутые распределения).",
+viz:{type:"chart",chartType:"distMetrics"},
+formulas:[
+  {tex:"d_2=\\sqrt{\\sum(x_j-y_j)^2}",explain:"евклидова"},
+  {tex:"d_1=\\sum|x_j-y_j|",explain:"манхэттенская"},
+  {tex:"d_\\infty=\\max_j|x_j-y_j|",explain:"Чебышёва"},
+  {tex:"d_{\\cos}=1-\\frac{x^\\top y}{\\|x\\|\\|y\\|}",explain:"косинусная — на угле"},
+  {tex:"d_M=\\sqrt{(x-y)^\\top\\Sigma^{-1}(x-y)}",explain:"Махаланобис — учитывает ковариацию"}
+],
+pitfalls:[
+  "Все метрики на основе нормы требуют масштабирования.",
+  "Косинус игнорирует длину вектора — не подходит, если она важна.",
+  "Махаланобис требует оценки Σ — нестабилен при d>N.",
+  "Категориальные признаки → Hamming, Gower."
+],
+quiz:[
+  {q:"Какая метрика — на угле, не на длине?",opt:["Евклид","Манхэттен","Косинусная","Чебышёв"],correct:2,explain:"d_cos = 1 − cos(x,y), длина не учитывается."},
+  {q:"Метрика, эквивалентная max по координатам?",opt:["Манхэттен","Евклид","Чебышёва","Минковский с p=1"],correct:2,explain:"d_∞ = max|x_j − y_j|."},
+  {q:"Махаланобис учитывает…",opt:["метки","ковариацию признаков","знаки","масштаб"],correct:1,explain:"Σ⁻¹ корректирует разные дисперсии и корреляции."},
+  {q:"TF-IDF документ — какая метрика?",opt:["Евклид","Косинус","Махаланобис","Hamming"],correct:1,explain:"Стандарт в NLP."}
+]
+},
+{
+id:25, block:"D. Классификация и кластеризация", title:"K-means",
+tldr:"Алгоритм: 1) случайные центры; 2) каждому объекту — ближайший центр; 3) центр = среднее объектов кластера; повторять. Минимизирует суммарную WCSS. K выбирается по elbow или silhouette. Чувствителен к инициализации (k-means++).",
+intuition:"Гравитация: точки притягиваются к ближайшему центру масс, центры пересчитываются. За несколько шагов — стабильное разбиение. Минусы: K надо знать, неустойчив к выбросам, любит сферы (евклидова метрика).",
+viz:{type:"chart",chartType:"kmeansSteps"},
+formulas:[
+  {tex:"Q=\\sum_{k=1}^K\\sum_{x\\in C_k}\\|x-\\mu_k\\|^2",explain:"WCSS — то, что минимизируем"},
+  {tex:"\\mu_k=\\frac{1}{|C_k|}\\sum_{x\\in C_k}x",explain:"обновление центра"},
+  {tex:"s_i=\\frac{b_i-a_i}{\\max(a_i,b_i)}",explain:"Silhouette ∈ [−1,1] — качество кластеризации"}
+],
+pitfalls:[
+  "Локальный минимум — запускай с k-means++ инициализацией и многими стартами.",
+  "Не подходит для не-сферических кластеров (используй DBSCAN, GMM).",
+  "K — гиперпараметр; ищи по elbow на WCSS или максимуму silhouette.",
+  "Чувствителен к масштабу — обязательно scaling.",
+  "Чувствителен к выбросам — медианный вариант (k-medians) устойчивее."
+],
+quiz:[
+  {q:"K-means минимизирует…",opt:["энтропию","WCSS","silhouette","расстояние между центрами"],correct:1,explain:"Сумма квадратов расстояний внутри кластеров."},
+  {q:"Главная слабость K-means?",opt:["медленный","любит сферы, чувствителен к init","не сходится","нет аналога для регрессии"],correct:1,explain:"Не работает для вытянутых/невыпуклых форм."},
+  {q:"K выбирают по…",opt:["загруженности CPU","локтю на WCSS / silhouette","числу признаков","accuracy"],correct:1,explain:"Elbow или максимум silhouette."},
+  {q:"k-means++ улучшает…",opt:["скорость","качество начальной инициализации","метрику","scoring"],correct:1,explain:"Распределяет начальные центры подальше друг от друга."}
+]
+},
+{
+id:26, block:"D. Классификация и кластеризация", title:"Иерархическая кластеризация и DBSCAN",
+tldr:"Иерархическая (agglomerative): каждый объект — кластер, попарно сливаем ближайшие, пока не один. Linkage: single/complete/average/Ward. DBSCAN: ε-окрестность + minPts, выделяет шум, находит произвольные формы.",
+intuition:"Иерархическая строит дендрограмму — резать можно на любой высоте, не нужно знать K. DBSCAN: «достаточно густо собрались — кластер; одинокая точка — шум». Идеален для двух полумесяцев, где K-means проваливается.",
+viz:{type:"mermaid",code:`graph TD
+A[N точек = N кластеров] --> B[Сливаем ближайшие 2]
+B --> C[N-1 кластеров]
+C --> D[повторяем]
+D --> E[1 кластер]
+E --> F[Дендрограмма]
+F --> G[Режем на нужной высоте]
+H[DBSCAN] --> I[epsilon окрестность]
+I --> J[minPts соседей?]
+J --> K[Core point или Border или Шум]`},
+formulas:[
+  {tex:"d_{\\text{single}}=\\min_{a\\in A,b\\in B}d(a,b)",explain:"single link"},
+  {tex:"d_{\\text{complete}}=\\max d(a,b),\\;d_{\\text{average}}=\\tfrac{1}{|A||B|}\\sum d(a,b)",explain:"complete и average"},
+  {tex:"\\text{Ward: }\\min\\Delta\\text{WCSS}",explain:"минимизация роста дисперсии при слиянии"}
+],
+pitfalls:[
+  "Hierarchical: O(N²) память, тяжело при N>10k.",
+  "Single link даёт «цепочки» (chaining); complete — компактные кластеры.",
+  "DBSCAN: ε и minPts критичны; ε подбирают по k-distance plot.",
+  "DBSCAN плохо работает при кластерах разной плотности → HDBSCAN."
+],
+quiz:[
+  {q:"Что НЕ требует знать число кластеров заранее?",opt:["K-means","Hierarchical","DBSCAN","B и C"],correct:3,explain:"И иерархическая, и DBSCAN сами «найдут» нужное число."},
+  {q:"DBSCAN относит точку к шуму, если…",opt:["она далеко от центра","в ε нет minPts соседей и она не достижима из core","она первая","по моде"],correct:1,explain:"Не core и не граничная."},
+  {q:"Single linkage склонен к…",opt:["компактным кластерам","цепочкам","сферам","шуму"],correct:1,explain:"Достаточно одной близкой пары точек, чтобы слить кластеры."},
+  {q:"K-means проваливается на двух полумесяцах. Что подойдёт?",opt:["K-means с другим K","DBSCAN / Spectral / HDBSCAN","Hierarchical Ward","Naive Bayes"],correct:1,explain:"Нужен метод, не предполагающий сферические кластеры."}
+]
+},
+{
+id:27, block:"D. Классификация и кластеризация", title:"Кросс-валидация",
+tldr:"k-Fold: делим train на k частей, по очереди берём одну как valid. Stratified — сохраняет долю классов. LOOCV (k=N) — дорого, низкий bias, высокая variance. Nested CV — внешний для оценки, внутренний для гиперпараметров.",
+intuition:"Один train/test split — это лотерея. CV усредняет качество по нескольким разбиениям → более стабильная оценка. Nested — единственный честный способ одновременно подбирать гиперпараметры и оценивать обобщение.",
+viz:{type:"mermaid",code:`graph LR
+A[Train data] --> B[Fold 1 = test]
+A --> C[Fold 2 = test]
+A --> D[Fold 3 = test]
+A --> E[Fold 4 = test]
+A --> F[Fold 5 = test]
+B --> L[CV mean Q std]
+C --> L
+D --> L
+E --> L
+F --> L`},
+formulas:[
+  {tex:"\\text{CV}_k=\\frac{1}{k}\\sum_{j=1}^k Q_j^{\\text{test}}",explain:"среднее по фолдам"}
+],
+pitfalls:[
+  "Перемешивание (shuffle) обязательно, если данные отсортированы.",
+  "Time-series — обычный k-fold нельзя, только TimeSeriesSplit (test всегда после train).",
+  "Stratified — для классификации с дисбалансом.",
+  "Все преобразования (scaler, encoder) должны быть внутри Pipeline, иначе data leakage в CV.",
+  "GridSearchCV даёт уже nested CV если использовать .best_estimator_ на отдельном test."
+],
+quiz:[
+  {q:"k=N — это…",opt:["StratifiedKFold","LOOCV","TimeSeriesSplit","Train/test"],correct:1,explain:"Leave-One-Out: тестируем по одному объекту."},
+  {q:"Дисбаланс классов в CV — нужно…",opt:["больше folds","Stratified","ничего","меньше folds"],correct:1,explain:"Сохраняет долю классов в каждом фолде."},
+  {q:"Time series — какой split?",opt:["KFold","StratifiedKFold","TimeSeriesSplit","ShuffleSplit"],correct:2,explain:"Чтобы test всегда был «в будущем» относительно train."},
+  {q:"Где хранить scaler?",opt:["вне CV (один раз на всех)","внутри Pipeline в CV","на test","нигде"],correct:1,explain:"Иначе fit на test → data leakage."}
+]
+},
+{
+id:28, block:"D. Классификация и кластеризация", title:"Метрики классификации",
+tldr:"Confusion matrix: TP, FP, FN, TN. Accuracy — обманчив при дисбалансе. Precision = TP/(TP+FP) — «не ошибаемся, когда говорим да». Recall = TP/(TP+FN) — «не упускаем». F1 — гармоническое среднее. ROC-AUC, PR-AUC — пороговонезависимые.",
+intuition:"Precision = «когда я предсказал спам — это спам?». Recall = «сколько спама я поймал?». Их нельзя максимизировать одновременно — компромисс через threshold. ROC-AUC показывает, насколько модель отделяет классы независимо от порога.",
+viz:{type:"chart",chartType:"rocPr"},
+formulas:[
+  {tex:"P=\\frac{TP}{TP+FP},\\;R=\\frac{TP}{TP+FN}",explain:"precision и recall"},
+  {tex:"F_1=\\frac{2PR}{P+R},\\;F_\\beta=(1+\\beta^2)\\frac{PR}{\\beta^2 P+R}",explain:"F1 и F-бета"},
+  {tex:"\\text{Accuracy}=\\frac{TP+TN}{N},\\;\\text{Bal.Acc}=\\tfrac{1}{2}(\\text{TPR}+\\text{TNR})",explain:"для дисбаланса лучше balanced"},
+  {tex:"\\text{Log-loss}=-\\tfrac{1}{N}\\sum[y\\log p+(1-y)\\log(1-p)]",explain:"оценивает калибровку вероятностей"}
+],
+pitfalls:[
+  "Accuracy при 99/1 дисбалансе → бесполезна.",
+  "ROC-AUC при сильном дисбалансе оптимистичен — лучше PR-AUC.",
+  "F1 не учитывает TN — несимметричен по классам (используй MCC если важна симметрия).",
+  "Threshold подбирай под бизнес-задачу: precision vs recall."
+],
+quiz:[
+  {q:"Цель: не пропустить рак (FN дороже FP). Что максимизируем?",opt:["Precision","Recall","Accuracy","FPR"],correct:1,explain:"Recall = чувствительность, минимизирует FN."},
+  {q:"Accuracy=0.99, recall=0.0. Класс редкий?",opt:["нет","да, модель предсказывает только мажоритарный","нормально","ошибка"],correct:1,explain:"Тривиальная модель «всегда нет» при сильном дисбалансе."},
+  {q:"ROC-AUC = 0.5 — это…",opt:["идеально","плохо, как монетка","нормально","нельзя интерпретировать"],correct:1,explain:"Случайный классификатор."},
+  {q:"PR-AUC лучше ROC-AUC при…",opt:["сбалансированных классах","сильном дисбалансе","малой выборке","большой размерности"],correct:1,explain:"PR-AUC точнее показывает качество на редком положительном классе."}
+]
+},
+
+/* ===== БЛОК E. Ансамбли ===== */
+{
+id:29, block:"E. Ансамбли", title:"Голосование классификаторов",
+tldr:"Hard voting — мажоритарное голосование меток. Soft voting — усреднение вероятностей с весами. Работает, если модели независимы и лучше случайной — тогда ансамбль улучшает качество (теорема Кондорсе).",
+intuition:"Если 3 врача независимо ставят диагноз, и каждый прав в 70%, то «голосование двух из трёх» даёт ~78%. Чем независимее модели и точнее каждая, тем сильнее эффект. Если модели коррелируют — выигрыш ноль.",
+viz:{type:"mermaid",code:`graph LR
+X[Объект x] --> M1[Модель 1 - класс A]
+X --> M2[Модель 2 - класс A]
+X --> M3[Модель 3 - класс B]
+M1 --> V[Voting]
+M2 --> V
+M3 --> V
+V --> Y[A]`},
+formulas:[
+  {tex:"\\hat y_{\\text{hard}}=\\arg\\max_c\\sum_m\\mathbb{1}[a_m(x)=c]",explain:"мажоритарное"},
+  {tex:"\\hat y_{\\text{soft}}=\\arg\\max_c\\sum_m w_m p_m(c|x)",explain:"взвешенное среднее вероятностей"}
+],
+pitfalls:[
+  "Hard voting не учитывает уверенность — soft обычно лучше, если модели калиброваны.",
+  "Если все модели одинаковые — ансамбль = одна модель.",
+  "Слабые модели (хуже монетки) — могут сделать всё ХУЖЕ.",
+  "Веса в soft voting подбирай по validation."
+],
+quiz:[
+  {q:"Soft voting лучше hard когда…",opt:["модели некалиброваны","модели выдают калиброванные вероятности","классов 2","нет валидации"],correct:1,explain:"Усреднение вероятностей сохраняет «уверенность»."},
+  {q:"Главное условие, чтобы voting улучшал качество?",opt:["модели одинаковые","модели разнообразные и лучше случайной","скорость","малая размерность"],correct:1,explain:"Diversity + точность > 0.5."},
+  {q:"Если все 3 модели всегда дают одинаковый ответ — voting…",opt:["лучше всех","= одной модели","хуже","быстрее"],correct:1,explain:"Нет diversity → нет улучшения."}
+]
+},
+{
+id:30, block:"E. Ансамбли", title:"Bagging и Random Forest",
+tldr:"Bagging = bootstrap aggregating: M моделей на M бутстрэп-выборках, усреднение. Снижает variance. Random Forest = bagging + случайный подбор √d признаков на каждом split. OOB-оценка ≈ бесплатный validation.",
+intuition:"Бутстрэп выбирает ~63.2% уникальных объектов в каждую подвыборку (1−1/e). Остальные 36.8% — out-of-bag, на них считаем валидацию без отдельного split. Случайные признаки — для дополнительной decorrelation деревьев.",
+viz:{type:"chart",chartType:"baggingOOB"},
+formulas:[
+  {tex:"P(\\text{в бутстрэп})=1-(1-1/N)^N\\to 1-1/e\\approx 0.632",explain:"вероятность попасть в bootstrap-выборку"},
+  {tex:"a_{\\text{bag}}(x)=\\tfrac{1}{M}\\sum_m a_m(x)",explain:"усреднение для регрессии"},
+  {tex:"\\text{Var}(\\bar a)=\\rho\\sigma^2+\\frac{1-\\rho}{M}\\sigma^2",explain:"декорреляция (ρ↓) уменьшает variance"}
+],
+pitfalls:[
+  "Bagging не помогает стабильным моделям (например, kNN, линейка) — только нестабильным (деревья).",
+  "Слишком много деревьев M — diminishing returns, но не вредит (только память/скорость).",
+  "RF: max_features=√d для классификации, d/3 для регрессии.",
+  "OOB-оценка имеет смысл при N>~20·M_деревьев на оценку."
+],
+quiz:[
+  {q:"Bagging уменьшает преимущественно…",opt:["bias","variance","шум","time"],correct:1,explain:"Усреднение снижает разброс."},
+  {q:"Какая доля объектов попадает в бутстрэп?",opt:["50%","63.2%","100%","36.8%"],correct:1,explain:"1 − (1−1/N)^N → 1 − 1/e ≈ 0.632."},
+  {q:"Что добавляет Random Forest по сравнению с bagging?",opt:["Boosting","Случайный подбор √d признаков на split","Stacking","ничего"],correct:1,explain:"Доп. decorrelation деревьев."},
+  {q:"OOB — это…",opt:["метод регуляризации","объекты, не попавшие в бутстрэп → встроенный валидационный набор","оптимизатор","loss"],correct:1,explain:"Out-of-bag оценка качества — почти бесплатный CV."}
+]
+},
+{
+id:31, block:"E. Ансамбли", title:"AdaBoost",
+tldr:"Последовательно строит слабые модели, на каждой итерации увеличивает веса ошибочно классифицированных объектов. Финал: взвешенное голосование. Минимизирует экспоненциальный loss.",
+intuition:"Каждая следующая модель «фокусируется» на сложных примерах. Сильные веса α у точных моделей, слабые — у плохих. В пределе из десятков пеньков (deep=1) получается мощная модель.",
+viz:{type:"chart",chartType:"adaboostWeights"},
+formulas:[
+  {tex:"w_i^{(1)}=1/N",explain:"начальные веса"},
+  {tex:"\\varepsilon_m=\\sum_i w_i^{(m)}\\mathbb{1}[a_m(x_i)\\ne y_i]",explain:"взвешенная ошибка"},
+  {tex:"\\alpha_m=\\tfrac{1}{2}\\ln\\frac{1-\\varepsilon_m}{\\varepsilon_m}",explain:"вес модели — точная модель = большой α"},
+  {tex:"w_i^{(m+1)}\\propto w_i^{(m)}\\exp(-\\alpha_m y_i a_m(x_i))",explain:"увеличение веса ошибочных"}
+],
+pitfalls:[
+  "Чувствителен к выбросам — они вечно «ошибочны», вес взлетает до неба.",
+  "y in {-1,+1}, не {0,1}.",
+  "Если ε_m > 0.5 — модель хуже монетки, отбрасываем (α_m < 0).",
+  "Базовые ученики обычно decision stumps (depth=1)."
+],
+quiz:[
+  {q:"AdaBoost увеличивает веса каких объектов?",opt:["правильных","ошибочно классифицированных","случайных","отсутствует"],correct:1,explain:"Чтобы следующая модель училась именно на них."},
+  {q:"α_m большое — это…",opt:["неточная модель","точная модель (малая ε)","выброс","шум"],correct:1,explain:"Чем меньше ε, тем больше log-отношение → α."},
+  {q:"AdaBoost минимизирует…",opt:["MSE","exp(-y·F(x))","cross-entropy","MAE"],correct:1,explain:"Эквивалент экспоненциального loss."},
+  {q:"Слабый ученик в AdaBoost — обычно…",opt:["глубокое дерево","decision stump","нейросеть","SVM"],correct:1,explain:"Пень (depth=1) — просто и эффективно."}
+]
+},
+{
+id:32, block:"E. Ансамбли", title:"Градиентный бустинг",
+tldr:"Каждое дерево обучается предсказывать антиградиент loss относительно текущего ансамбля (псевдоостатки). Для MSE = просто остатки. F_m = F_{m-1} + ν h_m. ν — learning rate. XGBoost / LightGBM / CatBoost — современные реализации.",
+intuition:"AdaBoost через изменение весов; GBM через подгонку остатков. Если ансамбль ошибается — обучи дерево, которое предсказывает эту ошибку, и добавь его (с маленьким шагом ν, чтобы не переборщить). Loss любой дифференцируемый.",
+viz:{type:"chart",chartType:"gbmResidual"},
+formulas:[
+  {tex:"r_i^{(m)}=-\\frac{\\partial \\mathcal{L}(y_i,F(x_i))}{\\partial F(x_i)}\\big|_{F=F_{m-1}}",explain:"псевдоостатки — антиградиент"},
+  {tex:"\\text{MSE: }r_i=y_i-F_{m-1}(x_i)",explain:"для MSE — обычные остатки"},
+  {tex:"F_m=F_{m-1}+\\nu h_m",explain:"shrinkage с learning rate ν"},
+  {tex:"\\Omega(h)=\\gamma T+\\tfrac{\\lambda}{2}\\|w\\|^2",explain:"XGBoost: регуляризация дерева"}
+],
+pitfalls:[
+  "Чувствителен к гиперпараметрам — ν, n_estimators, max_depth, subsample.",
+  "Большой ν → быстрая, но нестабильная сходимость; маленький ν + много деревьев → лучше.",
+  "Early stopping по validation — почти обязателен.",
+  "В отличие от bagging, GBM последовательный — нельзя распараллелить деревья."
+],
+quiz:[
+  {q:"Псевдоостатки в GBM — это…",opt:["веса","антиградиент loss","ошибки classifier","label"],correct:1,explain:"−∂L/∂F при текущем F_{m−1}."},
+  {q:"Для MSE псевдоостатки равны…",opt:["y","y − ŷ","ŷ","|y − ŷ|"],correct:1,explain:"Производная (y−F)² по F = −(y−F)·2 → антиградиент = y−F."},
+  {q:"Маленький learning rate ν требует…",opt:["меньше деревьев","больше деревьев и обычно лучше качество","больше CPU","ничего"],correct:1,explain:"Маленькие шаги — нужен длинный путь, зато стабильнее."},
+  {q:"Что НЕ делает XGBoost дополнительно?",opt:["L2-регуляризация листьев","second-order разложение loss","subsample","всегда параллельно деревья"],correct:3,explain:"Деревья последовательны, но split-точки внутри дерева — параллельно."}
+]
+},
+
+/* ===== БЛОК F. Нейронные сети ===== */
+{
+id:33, block:"F. Нейронные сети", title:"Модель искусственного нейрона",
+tldr:"Нейрон: z = w·x + b → y = φ(z). Предактивация — линейная комбинация входов плюс смещение, затем нелинейность φ. Один нейрон с сигмоидой = логистическая регрессия.",
+intuition:"Нейрон — обобщение линейной модели: вход умножается на веса, складывается, проходит через нелинейную функцию. Без нелинейности любая глубина схлопывается в одну линейку. Bias — свободный сдвиг гиперплоскости решения.",
+viz:{type:"mermaid",code:`graph LR
+X1[x_1] -->|w_1| S[Сумма<br/>z = sum w_i x_i + b]
+X2[x_2] -->|w_2| S
+X3[x_3] -->|w_3| S
+B[b] --> S
+S --> A[phi z]
+A --> Y[y]`},
+formulas:[
+  {tex:"z=\\sum_j w_j x_j + b = w^\\top x + b",explain:"предактивация (взвешенная сумма)"},
+  {tex:"y=\\varphi(z)",explain:"активация (нелинейность)"},
+  {tex:"H(d+1)\\;\\text{параметров на слой H нейронов}",explain:"+1 — это bias на каждый нейрон"}
+],
+pitfalls:[
+  "Без нелинейности (φ = identity) две линейки = одна линейка — глубина ничего не даёт.",
+  "Bias важен — без него гиперплоскость всегда проходит через 0.",
+  "Активации должны быть дифференцируемы (для backprop).",
+  "Один нейрон ограничен линейной разделимостью (XOR не решает)."
+],
+quiz:[
+  {q:"Что такое z в нейроне?",opt:["активация","предактивация (w·x+b)","веса","выход"],correct:1,explain:"z — взвешенная сумма до нелинейности."},
+  {q:"Почему нужна нелинейность?",opt:["для скорости","иначе любая глубина = одна линейка","для регуляризации","для интерпретации"],correct:1,explain:"Композиция линейных = линейная."},
+  {q:"Один нейрон с сигмоидой = …",opt:["линейная регрессия","логистическая регрессия","SVM","kNN"],correct:1,explain:"σ(w·x+b) — это и есть логистика."},
+  {q:"Зачем bias?",opt:["для масштаба","сдвиг гиперплоскости","регуляризация","ничего"],correct:1,explain:"Без b разделяющая поверхность всегда через начало координат."}
+]
+},
+{
+id:34, block:"F. Нейронные сети", title:"Функции активации",
+tldr:"Sigmoid σ(z) — гладкая, [0,1], насыщается. Tanh — [−1,1], симметрично. ReLU — max(0,z) — стандарт скрытых слоёв, не насыщается, дешёвая, но «умирает» при z<0. Leaky ReLU / ELU / GELU решают проблему мёртвых нейронов. Softmax — для выходов многоклассовой классификации.",
+intuition:"Активация решает: «разрешить ли сигналу пройти и насколько». Современный стандарт — ReLU и её варианты: производная либо 1, либо 0, никаких затухающих градиентов. Sigmoid и tanh насыщаются по краям, градиент → 0, обучение глубоких сетей замирает (vanishing gradient).",
+viz:{type:"chart",chartType:"activations"},
+formulas:[
+  {tex:"\\sigma(z)=\\frac{1}{1+e^{-z}},\\;\\sigma'(z)=\\sigma(z)(1-\\sigma(z))",explain:"сигмоида"},
+  {tex:"\\tanh(z)=\\frac{e^z-e^{-z}}{e^z+e^{-z}},\\;\\tanh'(z)=1-\\tanh^2 z",explain:"tanh"},
+  {tex:"\\text{ReLU}(z)=\\max(0,z),\\;\\text{ReLU}'=\\mathbb{1}[z>0]",explain:"ReLU — стандарт скрытых слоёв"},
+  {tex:"\\text{softmax}(z)_k=\\frac{e^{z_k}}{\\sum_j e^{z_j}}",explain:"softmax — многоклассовый выход"}
+],
+pitfalls:[
+  "Sigmoid в скрытых слоях глубоких сетей → vanishing gradient.",
+  "ReLU dying: если z<0 для всего батча, нейрон мёртв навсегда → Leaky ReLU.",
+  "Softmax + cross-entropy численно: используй log-sum-exp trick.",
+  "Не путай: на выходе бинарной классификации — sigmoid, на многоклассе — softmax."
+],
+quiz:[
+  {q:"Стандарт скрытых слоёв в современных DL?",opt:["sigmoid","tanh","ReLU и её варианты","softmax"],correct:2,explain:"ReLU — дешёвая, не насыщается с положительной стороны."},
+  {q:"Vanishing gradient в sigmoid возникает потому что…",opt:["плохая инициализация","|σ′| ≤ 0.25 и быстро падает","неправильный loss","нет batchnorm"],correct:1,explain:"При насыщении σ′ → 0; в глубокой сети произведение → 0."},
+  {q:"Dying ReLU решается через…",opt:["BatchNorm","Leaky ReLU / ELU","больший lr","меньший batch"],correct:1,explain:"Leaky ReLU имеет небольшой наклон при z<0 → нейрон не умирает."},
+  {q:"Softmax — это…",opt:["для бинарной классификации","для многоклассовой — нормирует логиты в распределение","всегда лучше sigmoid","для регрессии"],correct:1,explain:"Σ p_k = 1, max выделяется."}
+]
+},
+{
+id:35, block:"F. Нейронные сети", title:"Инициализация весов",
+tldr:"LeCun (Var = 1/n_in) — для tanh/sigmoid. Xavier/Glorot (Var = 2/(n_in+n_out)) — для tanh/sigmoid с балансом. He/Kaiming (Var = 2/n_in) — для ReLU. Bias обычно 0. Цель: дисперсии активаций и градиентов не взрываются и не схлопываются по слоям.",
+intuition:"Если все веса нули — все нейроны в слое идентичны (нет diversity). Слишком большие — активации взрываются. Слишком маленькие — затухают, градиенты исчезают. Правильная инициализация поддерживает «здоровое» распределение сигнала по слоям.",
+viz:{type:"chart",chartType:"initVariance"},
+formulas:[
+  {tex:"\\text{LeCun: }\\text{Var}(W)=1/n_{\\text{in}}",explain:"для линейных активаций / tanh"},
+  {tex:"\\text{Xavier/Glorot: }\\text{Var}(W)=\\frac{2}{n_{\\text{in}}+n_{\\text{out}}}",explain:"для tanh, симметрично"},
+  {tex:"\\text{He: }\\text{Var}(W)=2/n_{\\text{in}}",explain:"для ReLU — компенсирует обнуление половины"}
+],
+pitfalls:[
+  "Никогда не инициализируй W нулями — нет symmetry breaking.",
+  "Слишком большой scale → exploding gradients.",
+  "Для ReLU использовать Xavier — не оптимально (надо He).",
+  "Bias=0 норма; иногда small positive bias для ReLU чтобы разбудить нейроны."
+],
+quiz:[
+  {q:"Какая инициализация для ReLU?",opt:["LeCun","Xavier","He","нули"],correct:2,explain:"He компенсирует обнуление половины активаций."},
+  {q:"Если W=0 для всех…",opt:["сеть учится","все нейроны одинаковы — нет diversity","быстрее","меньше памяти"],correct:1,explain:"Symmetry breaking ломается."},
+  {q:"Цель инициализации?",opt:["скорость","дисперсия активаций/градиентов стабильна по глубине","меньше памяти","точность"],correct:1,explain:"Если Var съезжает по слоям — обучение разваливается."},
+  {q:"Xavier — для…",opt:["ReLU","tanh / sigmoid","softmax","Adam"],correct:1,explain:"Симметричные активации с производной около 0 в нуле."}
+]
+},
+{
+id:36, block:"F. Нейронные сети", title:"Многослойный персептрон (MLP)",
+tldr:"MLP = последовательность полносвязных слоёв с нелинейностями. Универсальная теорема: с одним достаточно широким скрытым слоем MLP может приблизить любую непрерывную функцию. На практике глубже = эффективнее по параметрам.",
+intuition:"Каждый слой — нелинейное преобразование пространства. Чем глубже, тем абстрактнее представления. Один скрытый слой теоретически универсален, но требует огромного числа нейронов; глубокая сеть достигает того же меньшим числом параметров.",
+viz:{type:"mermaid",code:`graph LR
+I1[x_1] --> H1[h_1]
+I1 --> H2[h_2]
+I1 --> H3[h_3]
+I2[x_2] --> H1
+I2 --> H2
+I2 --> H3
+H1 --> O1[y_1]
+H2 --> O1
+H3 --> O1
+H1 --> O2[y_2]
+H2 --> O2
+H3 --> O2`},
+formulas:[
+  {tex:"h^{(l)}=\\varphi(W^{(l)} h^{(l-1)} + b^{(l)})",explain:"forward на слой l"},
+  {tex:"\\hat y = h^{(L)},\\;h^{(0)}=x",explain:"L-й слой — выход"},
+  {tex:"\\#\\text{params}=\\sum_l (n_{l-1}+1)\\cdot n_l",explain:"число параметров"}
+],
+pitfalls:[
+  "Без нелинейности глубина бесполезна.",
+  "Слишком широкие слои → переобучение и память.",
+  "Глубина без regularization (dropout, weight decay, BN) → нестабильна.",
+  "Универсальная теорема не говорит, что обучение найдёт нужные веса!"
+],
+quiz:[
+  {q:"Универсальная теорема аппроксимации говорит, что…",opt:["MLP с одним скрытым слоем универсален","всегда сходится","не нужна регуляризация","глубокие лучше широких"],correct:0,explain:"Достаточно одного скрытого слоя для приближения непрерывной функции."},
+  {q:"Зачем глубина, если хватает одного слоя?",opt:["так модно","эффективнее по числу параметров и обобщению","быстрее","меньше шума"],correct:1,explain:"Глубокие сети выражают сложные функции малым числом параметров."},
+  {q:"Forward слоя — это…",opt:["W·h + b → φ","φ(W·h)","W^T·h","h⊙W"],correct:0,explain:"Линейка + нелинейность."}
+]
+},
+{
+id:37, block:"F. Нейронные сети", title:"Backpropagation",
+tldr:"Алгоритм обратного распространения ошибки: chain rule по графу вычислений. Forward пасс — считаем активации; backward — градиенты от выхода ко входу: δ^(l-1) = (W^(l))^T δ^(l) ⊙ φ'(z^(l-1)).",
+intuition:"Чтобы понять, как изменить вес w, надо знать «насколько loss зависит от него». Это chain rule: производная loss по w = производная по выходу × производная выхода по w. Backprop эффективно считает все градиенты за один обратный проход.",
+viz:{type:"mermaid",code:`graph LR
+X[x] --> Z1[z1=W1 x+b1] --> H1[h1=phi z1] --> Z2[z2=W2 h1+b2] --> Y[y_hat=phi z2]
+Y --> L[Loss]
+L -.dL/dy_hat.-> Y
+Y -.dL/dz2.-> Z2
+Z2 -.dL/dW2.-> Z2
+Z2 -.dL/dh1.-> H1
+H1 -.dL/dz1.-> Z1
+Z1 -.dL/dW1.-> Z1`},
+formulas:[
+  {tex:"\\delta^{(L)}=\\hat y-y\\;\\text{(softmax+CE или sigmoid+BCE или MSE+linear)}",explain:"красивое совпадение градиента на выходе"},
+  {tex:"\\delta^{(l-1)}=(W^{(l)})^\\top \\delta^{(l)}\\odot\\varphi'(z^{(l-1)})",explain:"рекурсия в backward"},
+  {tex:"\\frac{\\partial \\mathcal{L}}{\\partial W^{(l)}}=\\delta^{(l)} (h^{(l-1)})^\\top",explain:"градиент по весам слоя"},
+  {tex:"\\theta\\leftarrow\\theta-\\eta\\nabla\\mathcal{L}",explain:"шаг градиентного спуска"}
+],
+pitfalls:[
+  "Vanishing gradient: при глубине градиенты убывают по слоям → лечится ReLU, BatchNorm, residual.",
+  "Exploding gradient: gradient clipping или меньшая инициализация.",
+  "Не забывай нулить градиенты между батчами (PyTorch: optimizer.zero_grad()).",
+  "Numerical: log/exp в loss требуют trick'ов (log-sum-exp, label smoothing)."
+],
+quiz:[
+  {q:"Backprop — это применение…",opt:["МНК","chain rule","SGD","Newton method"],correct:1,explain:"Цепное правило по вычислительному графу."},
+  {q:"Vanishing gradient лечится…",opt:["ReLU, BN, residual connections","увеличением lr","удалением слоёв","без активаций"],correct:0,explain:"Сохраняем градиенты живыми по глубине."},
+  {q:"δ^(L) для softmax + cross-entropy =",opt:["y","ŷ - y","-(y - ŷ)²","σ(z)"],correct:1,explain:"Красивое совпадение из-за дифференцирования softmax-CE."},
+  {q:"Почему PyTorch требует zero_grad()?",opt:["для скорости","градиенты накапливаются по умолчанию","для регуляризации","для безопасности"],correct:1,explain:"Иначе .backward() добавляет к старому градиенту."}
+]
+},
+{
+id:38, block:"F. Нейронные сети", title:"Тензоры",
+tldr:"Тензор — n-мерный массив. 0D=скаляр, 1D=вектор, 2D=матрица, 3D=кубик (батч векторов или одно изображение HWC), 4D=батч изображений (B,C,H,W), 5D=батч видео. Операции — broadcasting, поэлементные, матричное умножение, свёртка.",
+intuition:"NN работают с тензорами как унифицированной структурой. Размерности (shape) — это «координаты»: какой объект, какой пиксель, какой канал, какой шаг времени. Понимание shape — главное в отладке нейросетей.",
+viz:{type:"mermaid",code:`graph LR
+A[Скаляр<br/>0D, число] --> B[Вектор<br/>1D, длина d]
+B --> C[Матрица<br/>2D, N x d]
+C --> D[Изображение<br/>3D, H x W x C]
+D --> E[Батч изображений<br/>4D, B x C x H x W]
+E --> F[Видео<br/>5D, B x T x C x H x W]`},
+formulas:[
+  {tex:"\\text{shape}: (B, C, H, W)",explain:"PyTorch стандарт для CNN"},
+  {tex:"y=Wx,\\;W\\in\\mathbb{R}^{H\\times d},\\;x\\in\\mathbb{R}^{d}\\Rightarrow y\\in\\mathbb{R}^H",explain:"матричное умножение"}
+],
+pitfalls:[
+  "Channels-first (PyTorch) vs channels-last (TensorFlow по умолчанию) — другая размерность.",
+  "Broadcasting может скрыть ошибку shape — всегда проверяй размерности.",
+  "Reshape vs view: view требует contiguous, reshape копирует при необходимости.",
+  "Размерности batch (0) обычно не трогаем при операциях."
+],
+quiz:[
+  {q:"Shape батча из 32 RGB-изображений 224x224 в PyTorch?",opt:["(32, 224, 224, 3)","(32, 3, 224, 224)","(3, 32, 224, 224)","(224, 224, 3, 32)"],correct:1,explain:"PyTorch — channels-first: (B, C, H, W)."},
+  {q:"Скалярная функция потерь — какой ранг тензора?",opt:["0D","1D","2D","зависит"],correct:0,explain:"Loss — число (скаляр)."},
+  {q:"Broadcasting позволяет…",opt:["ускорять GPU","автоматически расширять размерности при операциях","сжимать тензор","менять тип"],correct:1,explain:"(B,1,H,W) и (1,C,1,1) → (B,C,H,W)."}
+]
+},
+{
+id:39, block:"F. Нейронные сети", title:"Автоматическое дифференцирование",
+tldr:"Autodiff = алгоритмическое вычисление производных через цепное правило по графу операций. Forward mode (для f: Rⁿ→R^m, m>>n) и reverse mode (m=1, n>>1, как в DL — это backprop). PyTorch autograd, TF GradientTape.",
+intuition:"Не путай с символьным дифференцированием (как в Wolfram) и не с numerical (конечные разности — медленно и шумно). Autodiff знает производную каждой элементарной операции, а сложные функции — это композиции.",
+viz:{type:"mermaid",code:`graph LR
+X[x = 2] --> S[u = x*x = 4]
+S --> R[y = sin u]
+R --> dY[dy/du = cos u]
+dY --> dX[dy/dx = cos u * 2x]`},
+formulas:[
+  {tex:"\\frac{\\partial L}{\\partial x}=\\frac{\\partial L}{\\partial y}\\cdot\\frac{\\partial y}{\\partial x}",explain:"chain rule — основа autodiff"},
+  {tex:"\\nabla_x L = J_y^\\top \\nabla_y L",explain:"для векторов: транспонированный якобиан"}
+],
+pitfalls:[
+  "Reverse mode требует хранить активации (forward) → память.",
+  "Не путай с символическим diff (символьная экспозия может расти экспоненциально).",
+  "Не дифференцируй недифференцируемые операции (argmax, штрафы) — нужен straight-through estimator или surrogate.",
+  ".detach() / .stop_gradient — выключает autograd для подграфа."
+],
+quiz:[
+  {q:"Что использует backprop в DL?",opt:["forward mode","reverse mode","symbolic","numerical"],correct:1,explain:"При m=1 (loss скаляр) reverse mode эффективнее."},
+  {q:"Autodiff отличается от numerical тем, что…",opt:["медленнее","использует chain rule на графе операций — точно","использует ε","использует sympy"],correct:1,explain:"Точные производные через chain rule, без численных ошибок."},
+  {q:"Reverse mode тяжёл по…",opt:["времени","памяти (хранение активаций)","точности","коду"],correct:1,explain:"Нужны промежуточные значения для backward pass."}
+]
+},
+{
+id:40, block:"F. Нейронные сети", title:"Подходы к обучению нейронных сетей",
+tldr:"Полный (full-batch) — все данные за шаг (точно, дорого). Стохастический (SGD, batch=1) — быстро, шумно, не застревает в плохих минимумах. Мини-батч (32–512) — компромисс, использует GPU. Хорошие практики: shuffle, lr scheduler, early stopping, gradient clipping.",
+intuition:"Loss-ландшафт нейросетей сильно невыпуклый — много седловых точек, плато, локальных минимумов. Шум стохастики помогает «вылезать» из них. Мини-батчи дают и эффективность GPU, и шум для регуляризации.",
+viz:{type:"chart",chartType:"lossLandscape"},
+formulas:[
+  {tex:"\\theta\\leftarrow\\theta-\\eta\\nabla_\\theta\\mathcal{L}_{\\text{batch}}",explain:"общий шаг"},
+  {tex:"\\mathcal{L}_{\\text{batch}}=\\frac{1}{B}\\sum_{i\\in\\text{batch}}\\mathcal{L}(y_i,\\hat y_i)",explain:"loss по мини-батчу"}
+],
+pitfalls:[
+  "lr слишком большой → loss=NaN; слишком маленький → не сойдётся.",
+  "Без shuffle батчи становятся коррелированными → плохая сходимость.",
+  "Early stopping по validation — простейшая регуляризация.",
+  "Gradient clipping (clip_grad_norm) — защита от exploding gradients (особенно в RNN/LSTM).",
+  "Размер батча влияет на обобщение: маленькие батчи часто обобщаются лучше."
+],
+quiz:[
+  {q:"Почему мини-батчи лучше full-batch на практике?",opt:["точнее градиент","эффективное использование GPU + полезный шум","меньше памяти модели","быстрее inference"],correct:1,explain:"GPU параллелит батч; шум помогает регуляризации."},
+  {q:"Loss=NaN — что вероятно?",opt:["мало данных","lr слишком большой / деление на 0","недообучение","ничего"],correct:1,explain:"Большой lr → взрыв весов, либо log(0)."},
+  {q:"Early stopping — это…",opt:["оптимизатор","регуляризация: остановка по росту val-loss","random init","clipping"],correct:1,explain:"Останавливаем до того, как модель переобучится."},
+  {q:"Gradient clipping нужен против…",opt:["vanishing","exploding gradients","медленного обучения","переобучения"],correct:1,explain:"Ограничивает норму градиента сверху."}
+]
+},
+{
+id:41, block:"F. Нейронные сети", title:"Оптимизаторы первого порядка",
+tldr:"SGD — простейший. Momentum — экспоненциальное среднее градиентов, ускоряет в долинах. Nesterov — заглядывает вперёд. AdaGrad/RMSProp — адаптивный lr по координатам. Adam = Momentum + RMSProp с bias correction. AdamW — decoupled weight decay (правильная L2).",
+intuition:"SGD катится строго по градиенту. Momentum даёт «инерцию» — катится дальше в нужном направлении, гасит колебания поперёк долины. Adaptive методы дают каждому весу свой lr (большой — там где градиент исторически мал, маленький — где велик). Adam — текущий стандарт.",
+viz:{type:"chart",chartType:"optimizerTraj"},
+formulas:[
+  {tex:"\\text{Momentum: }v_t=\\mu v_{t-1}+g_t,\\;\\theta_{t+1}=\\theta_t-\\eta v_t",explain:"μ ≈ 0.9 — инерция"},
+  {tex:"\\text{RMSProp: }G_t=\\rho G_{t-1}+(1-\\rho)g_t^2,\\;\\theta_{t+1}=\\theta_t-\\frac{\\eta}{\\sqrt{G_t}+\\varepsilon}g_t",explain:"делим на корень из EMA квадратов градиента"},
+  {tex:"\\text{Adam: }\\hat m_t=\\frac{m_t}{1-\\beta_1^t},\\;\\hat v_t=\\frac{v_t}{1-\\beta_2^t},\\;\\theta_{t+1}=\\theta_t-\\eta\\frac{\\hat m_t}{\\sqrt{\\hat v_t}+\\varepsilon}",explain:"Adam = Momentum + RMSProp + bias correction"},
+  {tex:"\\beta_1=0.9,\\;\\beta_2=0.999,\\;\\varepsilon=10^{-8},\\;\\eta=10^{-3}",explain:"дефолты Adam"}
+],
+pitfalls:[
+  "Adam с weight_decay внутри loss — путает регуляризацию; используй AdamW (decoupled).",
+  "Adam иногда обобщает хуже SGD+Momentum — для CNN на изображениях SGD часто лучше.",
+  "Momentum без cosine/step decay → плато; используй scheduler.",
+  "Огромный lr на старте Adam → дивергенция; делай warmup."
+],
+quiz:[
+  {q:"Adam = …",opt:["Momentum + L2","Momentum + RMSProp + bias correction","SGD + clipping","Newton-like"],correct:1,explain:"Совмещает первый и второй моменты градиента."},
+  {q:"β₁ в Adam управляет…",opt:["learning rate","сглаживанием первого момента (momentum)","weight decay","batch size"],correct:1,explain:"β₁=0.9 → EMA градиента."},
+  {q:"Чем плох обычный Adam с weight_decay?",opt:["медленно","weight_decay смешивается с adaptive lr; AdamW исправляет","всегда хуже","ничем"],correct:1,explain:"AdamW отделяет L2 от обновления — корректнее."},
+  {q:"Cosine annealing — это…",opt:["loss","LR scheduler с гладким уменьшением lr","momentum","init"],correct:1,explain:"η_t плавно убывает по cos."}
+]
+}
+];
+
+const BLOCKS=["A. Введение","B. Подготовка данных","C. Регрессия","D. Классификация и кластеризация","E. Ансамбли","F. Нейронные сети"];
+
+/* =========================================================
+   ХРАНИЛИЩЕ ПРОГРЕССА
+   ========================================================= */
+const STORAGE_KEY="ml_textbook_progress_v1";
+function loadProgress(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||"{}")}catch(e){return{}}}
+function saveProgress(p){localStorage.setItem(STORAGE_KEY,JSON.stringify(p))}
+let progress=loadProgress();
+function setQuizScore(id,score,total){
+  if(!progress[id])progress[id]={};
+  progress[id].quiz={score,total,pct:Math.round(100*score/total)};
+  progress[id].done=true;
+  saveProgress(progress);
+  renderSidebar();renderProgressBar();
+}
+function markRead(id){
+  if(!progress[id])progress[id]={};
+  progress[id].read=true;
+  saveProgress(progress);
+}
+function resetProgress(){if(confirm("Сбросить весь прогресс?")){progress={};saveProgress(progress);renderSidebar();renderProgressBar();renderTopic(currentId)}}
+
+/* =========================================================
+   НАВИГАЦИЯ
+   ========================================================= */
+let currentId=1;
+function getTopic(id){return TOPICS.find(t=>t.id===id)}
+function nextId(id){const i=TOPICS.findIndex(t=>t.id===id);return i<TOPICS.length-1?TOPICS[i+1].id:null}
+function prevId(id){const i=TOPICS.findIndex(t=>t.id===id);return i>0?TOPICS[i-1].id:null}
+
+function renderSidebar(){
+  const sb=document.getElementById("sidebar");
+  let h="";
+  for(const blk of BLOCKS){
+    h+=`<div class="text-xs muted mt-3 mb-1 font-semibold">${blk}</div>`;
+    for(const t of TOPICS.filter(x=>x.block===blk)){
+      const p=progress[t.id]||{};
+      let cls="ind";
+      if(p.quiz){
+        if(p.quiz.pct>=80)cls+=" done";
+        else if(p.quiz.pct>=50)cls+=" partial";
+        else cls+=" bad";
+      }else if(p.read)cls+=" partial";
+      const active=t.id===currentId?"active":"";
+      h+=`<a href="#" class="${active}" onclick="event.preventDefault();go(${t.id})"><span class="${cls}"></span>Q${t.id}. ${t.title}</a>`;
+    }
+  }
+  sb.innerHTML=h;
+}
+function renderProgressBar(){
+  const done=TOPICS.filter(t=>(progress[t.id]||{}).done).length;
+  const pct=Math.round(100*done/TOPICS.length);
+  document.getElementById("progressFill").style.width=pct+"%";
+  document.getElementById("progressText").textContent=`${done} из ${TOPICS.length} тем пройдено · ${pct}%`;
+}
+function go(id){currentId=id;renderTopic(id);renderSidebar();window.scrollTo({top:0,behavior:"smooth"})}
+
+/* =========================================================
+   РЕНДЕР ТЕМЫ
+   ========================================================= */
+function renderTopic(id){
+  const t=getTopic(id);
+  const main=document.getElementById("main");
+  if(!t){main.innerHTML=`<div class="muted">Тема ${id} ещё в работе.</div>`;return}
+  markRead(id);
+  let html=`
+    <div class="text-xs muted">${t.block}</div>
+    <h1 class="text-2xl font-bold mt-1 mb-3">Q${t.id}. ${t.title}</h1>
+    <div class="tldr"><b>💡 TL;DR.</b> ${t.tldr}</div>
+    <div class="h-section">🧠 Интуиция</div>
+    <div class="intuition">${t.intuition}</div>
+    <div class="h-section">📊 Визуализация</div>
+    <div id="vizBox" class="panel2 p-3"></div>
+    <div class="h-section">📐 Ключевые формулы <span class="badge">для понимания, не для зубрёжки</span></div>
+    <div id="formulasBox"></div>
+    <div class="h-section">⚠️ Подводные камни</div>
+    <div id="pitfallsBox"></div>
+    <div class="h-section">🎯 Тест на понимание</div>
+    <div id="quizBox"></div>
+    <div class="flex justify-between items-center mt-8 pt-4" style="border-top:1px solid var(--border)">
+      <button class="btn" onclick="${prevId(id)?`go(${prevId(id)})`:''}" ${prevId(id)?'':'disabled style="opacity:0.4"'}>← Назад</button>
+      <span class="muted text-sm">Q${id} из ${TOPICS.length}</span>
+      <button class="btn btn-primary" onclick="${nextId(id)?`go(${nextId(id)})`:'alert(\"Это последняя тема\")'}">Дальше →</button>
+    </div>
+  `;
+  main.innerHTML=html;
+  renderViz(t);
+  renderFormulas(t);
+  renderPitfalls(t);
+  renderQuiz(t);
+  if(window.renderMathInElement){renderMathInElement(main,{delimiters:[{left:"$$",right:"$$",display:true},{left:"$",right:"$",display:false}],throwOnError:false})}
+}
+
+function renderFormulas(t){
+  let h="";
+  for(const f of t.formulas||[]){
+    h+=`<div class="formula"><div>$$${f.tex}$$</div><div class="muted text-sm mt-1">${f.explain}</div></div>`;
+  }
+  document.getElementById("formulasBox").innerHTML=h;
+}
+function renderPitfalls(t){
+  let h="";
+  for(const p of t.pitfalls||[]){h+=`<div class="pitfall">${p}</div>`}
+  document.getElementById("pitfallsBox").innerHTML=h;
+}
+
+function renderQuiz(t){
+  const box=document.getElementById("quizBox");
+  let state=t.quiz.map(()=>({answered:false,picked:null}));
+  function paint(){
+    let h="";
+    t.quiz.forEach((q,qi)=>{
+      h+=`<div class="panel2 p-4 my-3"><div class="font-medium mb-2">${qi+1}. ${q.q}</div>`;
+      q.opt.forEach((o,oi)=>{
+        let cls="quiz-opt";
+        if(state[qi].answered){
+          cls+=" disabled";
+          if(oi===q.correct)cls+=" correct";
+          else if(oi===state[qi].picked)cls+=" wrong";
+        }
+        h+=`<button class="${cls}" onclick="${state[qi].answered?'':`pickAns(${t.id},${qi},${oi})`}"><b>${String.fromCharCode(65+oi)}.</b> ${o}</button>`;
+      });
+      if(state[qi].answered){
+        const ok=state[qi].picked===q.correct;
+        h+=`<div class="mt-2 text-sm ${ok?'':'muted'}" style="${ok?'color:var(--good)':''}">${ok?'✅ верно':'❌ правильный ответ — '+String.fromCharCode(65+q.correct)}. ${q.explain}</div>`;
+      }
+      h+=`</div>`;
+    });
+    if(state.every(s=>s.answered)){
+      const score=state.filter((s,i)=>s.picked===t.quiz[i].correct).length;
+      h+=`<div class="panel2 p-3 mt-3 text-center"><div class="stat-strong">${score} / ${t.quiz.length}</div><div class="muted text-sm mt-1">${score===t.quiz.length?'Идеально 🎉':score>=t.quiz.length*0.8?'Отлично':score>=t.quiz.length*0.5?'Нормально, повтори подводные камни':'Стоит вернуться к теме'}</div><button class="btn mt-3" onclick="renderQuiz(getTopic(${t.id}))">↺ Повторить</button></div>`;
+      setQuizScore(t.id,score,t.quiz.length);
+    }
+    box.innerHTML=h;
+  }
+  window.pickAns=(tid,qi,oi)=>{state[qi].picked=oi;state[qi].answered=true;paint()};
+  paint();
+}
+
+/* =========================================================
+   ВИЗУАЛИЗАЦИИ
+   ========================================================= */
+function renderViz(t){
+  const box=document.getElementById("vizBox");
+  if(!t.viz){box.innerHTML='<div class="muted text-sm">Визуализация для этой темы — текст и формулы ниже.</div>';return}
+  if(t.viz.type==="mermaid"){
+    const id="m"+t.id+"_"+Date.now();
+    box.innerHTML=`<div class="mermaid" id="${id}">${t.viz.code}</div>`;
+    try{mermaid.run({nodes:[document.getElementById(id)]})}catch(e){console.warn(e)}
+    return;
+  }
+  if(t.viz.type==="chart"){
+    box.innerHTML=`<canvas id="ch${t.id}" style="max-height:380px"></canvas>${t.viz.note?'<div class="muted text-sm mt-2">'+t.viz.note+'</div>':''}`;
+    const ctx=document.getElementById("ch"+t.id);
+    const cfg=buildChartConfig(t.viz);
+    if(cfg)new Chart(ctx,cfg);
+    return;
+  }
+  if(t.viz.type==="html"){box.innerHTML=t.viz.code;if(t.viz.init)t.viz.init();return}
+  if(t.viz.type==="svg"){box.innerHTML=t.viz.code;return}
+  box.innerHTML='<div class="muted text-sm">Визуализация недоступна.</div>';
+}
+
+/* helpers */
+const COL={ax:"#94a3b8",grid:"#334155",txt:"#e2e8f0",blue:"#38bdf8",violet:"#a78bfa",amber:"#f59e0b",red:"#ef4444",green:"#22c55e",pink:"#f472b6",cyan:"#22d3ee"};
+function baseOpts(title,xt,yt,extra={}){
+  return {responsive:true,plugins:{title:{display:!!title,text:title,color:COL.txt,font:{size:14}},legend:{labels:{color:COL.txt}},...extra.plugins},scales:{x:{title:{display:!!xt,text:xt,color:COL.ax},ticks:{color:COL.ax},grid:{color:COL.grid}},y:{title:{display:!!yt,text:yt,color:COL.ax},ticks:{color:COL.ax},grid:{color:COL.grid}},...(extra.scales||{})}};
+}
+function lineDS(label,data,color,opts={}){return {label,data,borderColor:color,backgroundColor:color+"33",tension:0.25,pointRadius:0,borderWidth:2,...opts}}
+function scatterDS(label,data,color,opts={}){return {label,data,backgroundColor:color,borderColor:color,pointRadius:5,showLine:false,...opts}}
+
+function buildChartConfig(viz){
+  const t=viz.chartType;
+  if(t==="biasVariance"){
+    const xs=Array.from({length:60},(_,i)=>i/6+0.5);
+    const bias=xs.map(x=>10/(x*x+0.3));
+    const variance=xs.map(x=>0.3*x*x);
+    const total=xs.map((_,i)=>bias[i]+variance[i]+1);
+    return {type:"line",data:{labels:xs.map(x=>x.toFixed(1)),datasets:[
+      lineDS("Bias²",bias,COL.amber),lineDS("Variance",variance,COL.red),lineDS("Total error",total,COL.green,{borderWidth:3})
+    ]},options:baseOpts("Bias-Variance trade-off","Сложность модели","Ошибка")};
+  }
+  if(t==="iqrBox"){
+    const data=[{x:1,y:5},{x:2,y:7},{x:3,y:6},{x:4,y:8},{x:5,y:7},{x:6,y:9},{x:7,y:6},{x:8,y:8},{x:9,y:30},{x:10,y:35}];
+    return {type:"scatter",data:{datasets:[
+      scatterDS("Точки",data.slice(0,8),COL.blue),
+      scatterDS("Выбросы",data.slice(8),COL.red,{pointRadius:8})
+    ]},options:baseOpts("IQR-правило: Q3 + 1.5·IQR — выбросы","x","y")};
+  }
+  if(t==="scaling"){
+    const orig=Array.from({length:30},(_,i)=>({x:i,y:Math.sin(i/4)*100+500+(i===28?2000:0)}));
+    const z=orig.map(p=>({x:p.x,y:(p.y-600)/300}));
+    const mm=orig.map(p=>({x:p.x,y:(p.y-Math.min(...orig.map(q=>q.y)))/(Math.max(...orig.map(q=>q.y))-Math.min(...orig.map(q=>q.y)))}));
+    return {type:"scatter",data:{datasets:[
+      scatterDS("Оригинал /1000",orig.map(p=>({x:p.x,y:p.y/1000})),COL.blue),
+      scatterDS("z-score (выброс смещает)",z,COL.amber),
+      scatterDS("MinMax (всё к нулю)",mm,COL.red),
+    ]},options:baseOpts("Эффект выброса на разных scaler'ах","i","нормированное значение")};
+  }
+  if(t==="pcaScree"){
+    const evr=[0.42,0.27,0.13,0.08,0.05,0.03,0.015,0.005];
+    const cum=evr.reduce((acc,v,i)=>{acc.push((acc[i-1]||0)+v);return acc},[]);
+    return {type:"bar",data:{labels:evr.map((_,i)=>"PC"+(i+1)),datasets:[
+      {type:"bar",label:"EVR",data:evr,backgroundColor:COL.blue},
+      {type:"line",label:"Кумулятивно",data:cum,borderColor:COL.green,backgroundColor:COL.green+"33",tension:0.2}
+    ]},options:baseOpts("Scree plot — выбираем k где «локоть»","Главные компоненты","Доля дисперсии")};
+  }
+  if(t==="linregFit"){
+    const xs=Array.from({length:25},(_,i)=>i*0.4);
+    const ys=xs.map(x=>2.3*x+1+(Math.sin(x*1.7)+(Math.random()-0.5))*1.5);
+    const fit=xs.map(x=>2.3*x+1);
+    return {type:"scatter",data:{datasets:[
+      scatterDS("Данные",xs.map((x,i)=>({x,y:ys[i]})),COL.blue),
+      {type:"line",label:"OLS-прямая",data:xs.map((x,i)=>({x,y:fit[i]})),borderColor:COL.green,borderWidth:3,pointRadius:0,showLine:true}
+    ]},options:baseOpts("Линейная регрессия минимизирует сумму квадратов","x","y")};
+  }
+  if(t==="r2Demo"){
+    const xs=Array.from({length:30},(_,i)=>i*0.3);
+    const yt=xs.map(x=>1.5*x+0.5+(Math.random()-0.5)*1.5);
+    const yp=xs.map(x=>1.5*x+0.5);
+    return {type:"scatter",data:{datasets:[
+      scatterDS("y vs ŷ — идеал y=ŷ",yt.map((y,i)=>({x:yp[i],y})),COL.blue),
+      {type:"line",label:"y = ŷ (идеал)",data:[{x:0,y:0},{x:14,y:14}],borderColor:COL.green,borderWidth:2,borderDash:[6,4],pointRadius:0,showLine:true}
+    ]},options:baseOpts("Predicted vs actual: чем ближе к диагонали, тем выше R²","ŷ","y")};
+  }
+  if(t==="l1l2"){
+    const ws=Array.from({length:50},(_,i)=>i/2.5);
+    const ridge=ws.map(w=>5/(1+Math.exp(-(5-w)/2)));
+    const lasso=ws.map(w=>Math.max(0,5-w*0.4));
+    return {type:"line",data:{labels:ws.map(w=>w.toFixed(1)),datasets:[
+      lineDS("|w| при Ridge (плавно)",ridge,COL.blue),
+      lineDS("|w| при Lasso (резко в 0)",lasso,COL.red,{borderWidth:3})
+    ]},options:baseOpts("Путь коэффициентов с ростом λ","λ","|w|")};
+  }
+  if(t==="sigmoid"){
+    const xs=Array.from({length:80},(_,i)=>i*0.2-8);
+    const sig=xs.map(z=>1/(1+Math.exp(-z)));
+    const der=sig.map(s=>s*(1-s));
+    return {type:"line",data:{labels:xs.map(x=>x.toFixed(1)),datasets:[
+      lineDS("σ(z)",sig,COL.blue,{borderWidth:3}),
+      lineDS("σ'(z)",der,COL.amber)
+    ]},options:baseOpts("Сигмоида и её производная","z","")};
+  }
+  if(t==="polyOverfit"){
+    const xt=Array.from({length:12},(_,i)=>i/2);
+    const yt=xt.map(x=>Math.sin(x)+0.3*(Math.random()-0.5));
+    const xs=Array.from({length:80},(_,i)=>i/13);
+    const fit1=xs.map(x=>0.5+0.05*x);
+    const fit3=xs.map(x=>Math.sin(x));
+    const fit15=xs.map(x=>Math.sin(x)+0.7*Math.sin(3.5*x)*Math.exp(-Math.pow(x-3,2)/2));
+    return {type:"scatter",data:{datasets:[
+      scatterDS("данные",xt.map((x,i)=>({x,y:yt[i]})),COL.blue),
+      {type:"line",label:"degree=1 (underfit)",data:xs.map((x,i)=>({x,y:fit1[i]})),borderColor:COL.amber,pointRadius:0,showLine:true},
+      {type:"line",label:"degree=3 (хорошо)",data:xs.map((x,i)=>({x,y:fit3[i]})),borderColor:COL.green,pointRadius:0,showLine:true,borderWidth:3},
+      {type:"line",label:"degree=15 (overfit)",data:xs.map((x,i)=>({x,y:fit15[i]})),borderColor:COL.red,pointRadius:0,showLine:true,borderDash:[5,3]}
+    ]},options:baseOpts("Полиномы: степень → переобучение","x","y")};
+  }
+  if(t==="knnDecision"){
+    const cls0=[],cls1=[];
+    for(let i=0;i<25;i++){cls0.push({x:Math.random()*4+1,y:Math.random()*4+1})}
+    for(let i=0;i<25;i++){cls1.push({x:Math.random()*4+5,y:Math.random()*4+1})}
+    cls1.push({x:3,y:3});cls0.push({x:6,y:3});
+    return {type:"scatter",data:{datasets:[
+      scatterDS("класс 0",cls0,COL.blue),
+      scatterDS("класс 1",cls1,COL.red),
+      {type:"line",label:"граница (k=5)",data:[{x:4.5,y:0},{x:4.5,y:6}],borderColor:COL.green,pointRadius:0,showLine:true,borderWidth:2,borderDash:[4,4]}
+    ]},options:baseOpts("kNN: голосуем k ближайших","x1","x2")};
+  }
+  if(t==="depthOverfit"){
+    const d=[1,2,3,4,5,6,8,10,15,20];
+    const train=[0.4,0.32,0.25,0.2,0.16,0.12,0.07,0.04,0.01,0.005];
+    const test=[0.42,0.34,0.27,0.22,0.21,0.22,0.27,0.32,0.38,0.41];
+    return {type:"line",data:{labels:d,datasets:[
+      lineDS("train error",train,COL.blue),
+      lineDS("test error",test,COL.red,{borderWidth:3})
+    ]},options:baseOpts("Глубина дерева vs ошибка","max_depth","Ошибка")};
+  }
+  if(t==="svmMargin"){
+    const c0=[{x:1,y:1.5},{x:1.4,y:2.2},{x:1.8,y:1.2},{x:2.2,y:2.5},{x:2.5,y:1.7}];
+    const c1=[{x:4.5,y:5},{x:5,y:4.4},{x:5.4,y:5.5},{x:6,y:4.7},{x:6.4,y:5.2}];
+    const sv=[{x:2.5,y:1.7},{x:4.5,y:5}];
+    return {type:"scatter",data:{datasets:[
+      scatterDS("класс −1",c0,COL.blue),
+      scatterDS("класс +1",c1,COL.red),
+      scatterDS("опорные вектора",sv,COL.green,{pointRadius:11,borderColor:COL.green,backgroundColor:"transparent",borderWidth:2}),
+      {type:"line",label:"гиперплоскость",data:[{x:1,y:5.5},{x:7,y:1.5}],borderColor:COL.green,pointRadius:0,showLine:true,borderWidth:3},
+      {type:"line",label:"+ зазор",data:[{x:2,y:6},{x:8,y:2}],borderColor:COL.amber,borderDash:[5,5],pointRadius:0,showLine:true},
+      {type:"line",label:"− зазор",data:[{x:0,y:5},{x:6,y:1}],borderColor:COL.amber,borderDash:[5,5],pointRadius:0,showLine:true}
+    ]},options:baseOpts("SVM: максимальный зазор и опорные вектора","x1","x2")};
+  }
+  if(t==="distMetrics"){
+    const angs=Array.from({length:200},(_,i)=>i/200*2*Math.PI);
+    const eu=angs.map(a=>({x:Math.cos(a),y:Math.sin(a)}));
+    const man=angs.map(a=>{const c=Math.cos(a),s=Math.sin(a);const n=Math.abs(c)+Math.abs(s);return {x:c/n,y:s/n}});
+    const cheb=angs.map(a=>{const c=Math.cos(a),s=Math.sin(a);const n=Math.max(Math.abs(c),Math.abs(s));return {x:c/n,y:s/n}});
+    return {type:"scatter",data:{datasets:[
+      {label:"Евклид (L2 круг)",data:eu,borderColor:COL.blue,showLine:true,pointRadius:0,borderWidth:2},
+      {label:"Манхэттен (L1 ромб)",data:man,borderColor:COL.amber,showLine:true,pointRadius:0,borderWidth:2},
+      {label:"Чебышёв (L∞ квадрат)",data:cheb,borderColor:COL.red,showLine:true,pointRadius:0,borderWidth:2}
+    ]},options:baseOpts("Единичные «шары» разных метрик","x1","x2")};
+  }
+  if(t==="kmeansSteps"){
+    const c1=[],c2=[],c3=[];
+    for(let i=0;i<15;i++){c1.push({x:1+Math.random()*1.5,y:1+Math.random()*1.5})}
+    for(let i=0;i<15;i++){c2.push({x:5+Math.random()*1.5,y:5+Math.random()*1.5})}
+    for(let i=0;i<15;i++){c3.push({x:5+Math.random()*1.5,y:1+Math.random()*1.5})}
+    return {type:"scatter",data:{datasets:[
+      scatterDS("кластер 1",c1,COL.blue),
+      scatterDS("кластер 2",c2,COL.red),
+      scatterDS("кластер 3",c3,COL.amber),
+      scatterDS("центры",[{x:1.7,y:1.7},{x:5.7,y:5.7},{x:5.7,y:1.7}],COL.green,{pointRadius:14,pointStyle:"crossRot",borderWidth:3})
+    ]},options:baseOpts("K-means после сходимости","x1","x2")};
+  }
+  if(t==="rocPr"){
+    const fpr=Array.from({length:50},(_,i)=>i/49);
+    const tpr=fpr.map(x=>1-Math.pow(1-x,1.6));
+    return {type:"line",data:{labels:fpr.map(x=>x.toFixed(2)),datasets:[
+      lineDS("ROC-кривая",tpr,COL.green,{borderWidth:3,fill:true}),
+      lineDS("Случайная (AUC=0.5)",fpr,COL.red,{borderDash:[5,5]})
+    ]},options:baseOpts("ROC-кривая (AUC ≈ 0.85)","FPR","TPR")};
+  }
+  if(t==="baggingOOB"){
+    const ns=[1,5,10,20,50,100,200,500];
+    const acc=[0.62,0.74,0.78,0.81,0.83,0.84,0.845,0.846];
+    const oob=[0.55,0.7,0.76,0.8,0.82,0.835,0.84,0.842];
+    return {type:"line",data:{labels:ns,datasets:[
+      lineDS("Test accuracy",acc,COL.blue,{borderWidth:3}),
+      lineDS("OOB estimate",oob,COL.amber,{borderDash:[5,3]})
+    ]},options:baseOpts("Random Forest: чем больше деревьев, тем стабильнее","n_estimators","accuracy")};
+  }
+  if(t==="adaboostWeights"){
+    return {type:"bar",data:{labels:["x1 ✓","x2 ✓","x3 ✗","x4 ✓","x5 ✗","x6 ✓"],datasets:[
+      {label:"вес перед итерацией t",data:[1,1,1,1,1,1],backgroundColor:COL.blue},
+      {label:"вес после (ошибочные ↑)",data:[0.6,0.6,2.4,0.6,2.4,0.6],backgroundColor:COL.red}
+    ]},options:baseOpts("AdaBoost: ошибки получают больший вес","объекты","w_i")};
+  }
+  if(t==="gbmResidual"){
+    const xs=Array.from({length:20},(_,i)=>i*0.5);
+    const yt=xs.map(x=>Math.sin(x)+0.5*x);
+    const f1=xs.map(x=>0.5*x);
+    const f2=xs.map(x=>0.5*x+0.7*Math.sin(x));
+    const f3=xs.map(x=>Math.sin(x)+0.5*x);
+    return {type:"line",data:{labels:xs.map(x=>x.toFixed(1)),datasets:[
+      lineDS("истина y",yt,COL.blue,{borderWidth:3}),
+      lineDS("F_1 (одно дерево)",f1,COL.red),
+      lineDS("F_2 (после 2-го)",f2,COL.amber),
+      lineDS("F_M (готово)",f3,COL.green,{borderDash:[5,3]})
+    ]},options:baseOpts("Gradient Boosting: каждое дерево уменьшает остаток","x","y")};
+  }
+  if(t==="activations"){
+    const xs=Array.from({length:60},(_,i)=>i*0.3-9);
+    return {type:"line",data:{labels:xs.map(x=>x.toFixed(1)),datasets:[
+      lineDS("sigmoid",xs.map(z=>1/(1+Math.exp(-z))),COL.blue),
+      lineDS("tanh",xs.map(z=>Math.tanh(z)),COL.violet),
+      lineDS("ReLU",xs.map(z=>Math.max(0,z)),COL.green,{borderWidth:3}),
+      lineDS("Leaky ReLU",xs.map(z=>z>0?z:0.1*z),COL.amber),
+      lineDS("ELU",xs.map(z=>z>0?z:Math.exp(z)-1),COL.red)
+    ]},options:baseOpts("Функции активации","z","φ(z)")};
+  }
+  if(t==="initVariance"){
+    return {type:"line",data:{labels:["L1","L2","L3","L4","L5","L6","L7","L8"],datasets:[
+      lineDS("Слишком малая (затухание)",[1,0.4,0.16,0.06,0.025,0.01,0.004,0.0015],COL.red),
+      lineDS("He / Xavier (стабильно)",[1,0.95,1.02,0.98,1.05,1.0,0.97,1.01],COL.green,{borderWidth:3}),
+      lineDS("Слишком большая (взрыв)",[1,2.5,6,15,38,95,240,600],COL.amber)
+    ]},options:baseOpts("Дисперсия активаций по слоям","Слой","Var(h)")};
+  }
+  if(t==="lossLandscape"){
+    const xs=Array.from({length:50},(_,i)=>i*0.16-4);
+    const v1=xs.map(x=>0.5*x*x+1);
+    const v2=xs.map(x=>x*x*x*0.05+0.5*x*x-0.3*x*x*x*0.05+1);
+    const sa=xs.map(x=>(x-1.5)*(x-1.5)*0.4+Math.exp(-x*x)*1.5+0.5);
+    return {type:"line",data:{labels:xs.map(x=>x.toFixed(1)),datasets:[
+      lineDS("выпуклое (легко)",v1,COL.green),
+      lineDS("плато",sa,COL.amber,{borderWidth:3}),
+      lineDS("несколько минимумов",xs.map(x=>Math.cos(x*1.3)+0.1*x*x+1.2),COL.red)
+    ]},options:baseOpts("Loss-ландшафты: невыпуклые в DL","θ","L")};
+  }
+  if(t==="optimizerTraj"){
+    const N=40;
+    const sgd=[],mom=[],adam=[];
+    let s={x:-3,y:2.8},m={x:-3,y:2.8,vx:0,vy:0},a={x:-3,y:2.8,vx:0,vy:0,sx:0,sy:0};
+    for(let i=0;i<N;i++){
+      sgd.push({x:s.x,y:s.y});mom.push({x:m.x,y:m.y});adam.push({x:a.x,y:a.y});
+      const gxS=2*s.x*0.4,gyS=2*s.y;s.x-=0.05*gxS;s.y-=0.05*gyS;
+      const gxM=2*m.x*0.4,gyM=2*m.y;m.vx=0.9*m.vx-0.05*gxM;m.vy=0.9*m.vy-0.05*gyM;m.x+=m.vx;m.y+=m.vy;
+      const gxA=2*a.x*0.4,gyA=2*a.y;a.vx=0.9*a.vx+0.1*gxA;a.vy=0.9*a.vy+0.1*gyA;a.sx=0.999*a.sx+0.001*gxA*gxA;a.sy=0.999*a.sy+0.001*gyA*gyA;
+      a.x-=0.1*a.vx/(Math.sqrt(a.sx)+1e-3);a.y-=0.1*a.vy/(Math.sqrt(a.sy)+1e-3);
+    }
+    return {type:"scatter",data:{datasets:[
+      {label:"SGD",data:sgd,borderColor:COL.red,showLine:true,pointRadius:2},
+      {label:"Momentum",data:mom,borderColor:COL.amber,showLine:true,pointRadius:2},
+      {label:"Adam",data:adam,borderColor:COL.green,showLine:true,pointRadius:2,borderWidth:3},
+      scatterDS("минимум",[{x:0,y:0}],COL.blue,{pointRadius:10,pointStyle:"star"})
+    ]},options:baseOpts("Траектории оптимизаторов в долине","θ_1","θ_2")};
+  }
+  return null;
+}
+
+/* =========================================================
+   ДОП. РЕЖИМЫ
+   ========================================================= */
+function weakMode(){
+  const weak=TOPICS.filter(t=>{const p=progress[t.id];return !p||!p.quiz||p.quiz.pct<80});
+  if(!weak.length){alert("Все темы пройдены на 80%+. Молодец!");return}
+  const list=weak.map(t=>`Q${t.id}. ${t.title}`).join("\n");
+  if(confirm(`Слабых/непройденных тем: ${weak.length}\n\n${list}\n\nПерейти к первой?`))go(weak[0].id);
+}
+function toggleSidebar(){const sb=document.getElementById("sidebar");sb.style.display=sb.style.display==="none"?"block":"none"}
+
+/* =========================================================
+   ХОТКЕИ
+   ========================================================= */
+document.addEventListener("keydown",e=>{
+  if(e.target.tagName==="INPUT"||e.target.tagName==="TEXTAREA")return;
+  if(e.key==="ArrowRight"){const n=nextId(currentId);if(n)go(n)}
+  if(e.key==="ArrowLeft"){const p=prevId(currentId);if(p)go(p)}
+});
+
+/* =========================================================
+   ИНИЦИАЛИЗАЦИЯ
+   ========================================================= */
+window.addEventListener("DOMContentLoaded",()=>{
+  if(window.mermaid){mermaid.initialize({startOnLoad:false,theme:"default",securityLevel:"loose",flowchart:{htmlLabels:true,useMaxWidth:true}})}
+  renderSidebar();
+  renderProgressBar();
+  renderTopic(currentId);
+});
+</script>
+</body>
+</html>
